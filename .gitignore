@@ -1,5 +1,7 @@
 *
 !*.cc
+!*.h
+!*/
 !CMakeLists.txt
 !README.md
 !.gitignore
