@@ -28,28 +28,33 @@ class hash_map {
     bool empty{true};
   };
 
-  hash_map() : data(2), load{0} {}
+  using container = std::vector<entry>;
+  using size_type = typename container::size_type;
+
+  hash_map() : data(2) {}
 
   constexpr static float max_load_factor() { return 0.7; }
 
-  void resize(std::size_t new_size) {
-    std::vector<entry> new_data(new_size);
+  size_type node_index(const key_type& key) const noexcept {
     hasher hash{};
-    for (auto e : data) {
+    size_type index = hash(key) % data.size();
+    while (!data[index].empty && key != data[index].key)
+      index = (index + 1) % data.size();
+    return index;
+  }
+
+  void resize(size_type new_size) {
+    std::vector<entry> old_data(new_size);
+    data.swap(old_data);
+    for (auto e : old_data) {
       if (e.empty) continue;
-      std::size_t index = hash(e.key) % new_data.size();
-      while (!new_data[index].empty && e.key != new_data[index].key)
-        index = (index + 1) % new_data.size();
-      new_data[index] = e;
+      const auto index = node_index(e.key);
+      data[index] = e;
     }
-    data.swap(new_data);
   }
 
   void insert(const value_type& value) {
-    hasher hash{};
-    std::size_t index = hash(value.first) % data.size();
-    while (!data[index].empty && value.first != data[index].key)
-      index = (index + 1) % data.size();
+    const auto index = node_index(value.first);
     if (data[index].empty) ++load;
     data[index] = {value};  // use implicit conversion
     if (static_cast<float>(load) / data.size() >= max_load_factor())
@@ -57,16 +62,14 @@ class hash_map {
   }
 
   mapped_type& operator[](const key_type& key) {
-    hasher hash{};
-    std::size_t index = hash(key) % data.size();
-    while (!data[index].empty && key != data[index].key)
-      index = (index + 1) % data.size();
-    if (data[index].empty) throw std::runtime_error{"no key!"};
+    const auto index = node_index(key);
+    if (data[index].empty)
+      throw std::runtime_error{"This key was not inserted!"};
     return data[index].value;
   }
 
   std::vector<entry> data;
-  std::size_t load;
+  size_type load{0};
 };
 
 }  // namespace stroupo

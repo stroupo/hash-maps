@@ -10,7 +10,7 @@ struct custom_hash {
 };
 
 struct bit_reversal_hash {
-  std::size_t operator()(int key) const noexcept {
+  std::size_t operator()(int key) const {
     // we assume int == std::uint32_t
     key = ((0b10101010101010101010101010101010 & key) >> 1) |
           ((0b01010101010101010101010101010101 & key) << 1);
@@ -29,10 +29,8 @@ struct bit_reversal_hash {
 int main(int argc, char** argv) {
   using stroupo::hash_map;
   hash_map<int, int, bit_reversal_hash> map;
-  // map.data.resize(10);
 
   bit_reversal_hash hash{};
-
   std::mt19937 rng{std::random_device{}()};
   for (int i = 0; i < 10; ++i) {
     const auto number = rng();
@@ -76,4 +74,9 @@ int main(int argc, char** argv) {
   std::cout << "map[3] = " << map[3] << std::endl;
   std::cout << "map[4] = " << map[4] << std::endl;
   // std::cout << "map[1]) = " << map[1]) << std::endl;
+
+  std::cout << "sizeof(hash_map<int,int,bit_reversal_hash>) = "
+            << sizeof(hash_map<int, int, bit_reversal_hash>) << std::endl
+            << "sizeof(bit_reversal_hash) = " << sizeof(bit_reversal_hash)
+            << std::endl;
 }
