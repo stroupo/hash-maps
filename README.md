@@ -32,3 +32,9 @@ provide hash function for each type
 
 value
 int
+
+
+Fragen:
+- public vs private
+- separate interface from implementation?
+ - wieso container::size_type
