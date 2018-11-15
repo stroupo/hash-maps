@@ -1,7 +1,10 @@
 *
 !*.cc
 !*.h
+<<<<<<< HEAD
 !*/
+=======
+>>>>>>> origin/feature/linear_probing
 !CMakeLists.txt
 !README.md
 !.gitignore
