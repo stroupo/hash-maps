@@ -23,8 +23,8 @@ class hash_map {
     entry(const std::pair<key_type, mapped_type>& v)
         : entry{v.first, v.second} {}
 
-    int key{0};
-    int value{0};
+    key_type key{0};
+    mapped_type value{0};
     bool empty{true};
   };
 
@@ -33,13 +33,13 @@ class hash_map {
 
   hash_map() : data(2) {}
 
-// CAPACITY
+  // CAPACITY
   constexpr static float max_load_factor() { return 0.7; }
-  bool empty() const{return load == (size_type) 0;}
-  size_type size() const{return load;}
-  size_type max_size() const{return container::max_size();}
+  bool empty() const { return load == (size_type)0; }
+  size_type size() const { return load; }
+  size_type max_size() const { return container::max_size(); }
 
-// MODIFIERS
+  // MODIFIERS
   void insert(const value_type& value) {
     const auto index = node_index(value.first);
     if (data[index].empty) ++load;
@@ -47,7 +47,7 @@ class hash_map {
     if (static_cast<float>(load) / data.size() >= max_load_factor())
       resize(2 * data.size());
   }
-// LOOKUP
+  // LOOKUP
   mapped_type& operator[](const key_type& key) {
     const auto index = node_index(key);
     if (data[index].empty)
@@ -73,11 +73,10 @@ class hash_map {
     }
   }
 
-
   std::vector<entry> data;
   size_type load{0};
 };
 
 }  // namespace stroupo
 
-#endif // STROUPO_HASH_MAP_H_
+#endif  // STROUPO_HASH_MAP_H_
