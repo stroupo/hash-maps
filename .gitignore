@@ -1,5 +1,6 @@
 *
 !*/
+!.circleci/**
 !*.cc
 !*.h
 !CMakeLists.txt
