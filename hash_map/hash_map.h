@@ -50,9 +50,37 @@ class hash_map {
   // LOOKUP
   mapped_type& operator[](const key_type& key) {
     const auto index = node_index(key);
-    if (data[index].empty)
+    if (data[index].empty) // Stop wenn leer
       throw std::runtime_error{"This key was not inserted!"};
     return data[index].value;
+  }
+  // Vergleich der Abstände
+  bool probelenght (const size_type& current_index, const key_type& key) const noexcept {
+    hasher hash{}
+    const int current_length = current_index - (hash(data[current_index].key) % data.size()) // Abstand des gespeicherten Values zu einen ursprünglichen Hash-Wert
+    size_type lenght = current_index - (hash(key) % data.size())
+    if (current_length < lenght)
+    return true;
+  }
+
+  size_type node_index2(const key_type& key) const noexcept {
+    hasher hash{};
+    value_type current_value;
+    size_type index = hash(key) % data.size();
+    while(!data[index].empty){
+      if (probelenght(data[index], key)==false && key != data[index].key)){
+        index = (index + 1) % data.size();
+      }
+      else {
+        data.[index].swap(current_value);
+        return index
+        // Problem: Speichern von current_value in nächstem geeigneten
+      }
+    }
+
+    return index;
+
+
   }
 
   size_type node_index(const key_type& key) const noexcept {
