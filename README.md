@@ -3,6 +3,10 @@
 -
 -
 # Resources
+
+## Package manager
+- https://conan.io/
+
 ## Hashtables
 - https://probablydance.com/2014/05/03/i-wrote-a-fast-hash-table/
 - http://bannalia.blogspot.com/2014/01/a-better-hash-table-clang.html
@@ -11,3 +15,13 @@
 
 ## CMake
 - https://www.youtube.com/watch?v=bsXLMQ6WgIk
+- https://cliutils.gitlab.io/modern-cmake/
+
+## Doctest
+```sh
+git clone https://github.com/onqtam/doctest
+cd doctest && mkdir build && cd build
+cmake ..
+make 
+sudo make install
+```
