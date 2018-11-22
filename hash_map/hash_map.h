@@ -23,8 +23,8 @@ class hash_map {
     entry(const std::pair<key_type, mapped_type>& v)
         : entry{v.first, v.second} {}
 
-    key_type key{0};
-    mapped_type value{0};
+    key_type key{};
+    mapped_type value{};
     bool empty{true};
   };
 
