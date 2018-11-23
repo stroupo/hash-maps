@@ -56,40 +56,36 @@ class hash_map {
   }
 
   // COLLISION RESOLUTION
-  const int probelength(const size_type& current_index,
-                        const key_type& key) const noexcept {
+  const int probe_length(const size_type& current_index,
+                         const key_type& key) const noexcept {
     hasher hash {}
-    const int current_length =
-        current_index - (hash(data[current_index].key) %
-                         data.size())  // Abstand des gespeicherten Values zu
-                                       // einen ursprünglichen Hash-Wert
-        size_type length =
-            current_index -
-            (hash(key) % data.size()) if (current_length < length) return true;
+    const int current_length = return current_index - (hash(key) % data.size());
   }
 
   size_type robin_hood(const value_type& value) const noexcept {
     hasher hash{};
     size_type index = hash(value.first) % data.size();
+    value_type new_value = value;
 
     while (!data[index].empty && key != data[index].key) {
-      value_type old_value = data[index] if (probe_length(old_value.first) <
-                                             probe_length(new_value.first)) {
-        swapped_value = old_value;
-        data[index] = new_value;  // how to overload new_value
-        new_value = swapped_value;
+      value_type old_value = data[index];  // is swap better?
+      if (probe_length(index, old_value.first) <
+          probe_length(index, new_value.first)) {
+        value_type swapped_value = old_value;  // or should we swap here?
+        data[index] = {new_value};             // how to overload new_value
+        new_value = swapped_value;  // is it correct not to declare here?
       }
       index = (index + 1) % data.size();
     }
-    return index;
+    return index, new_value;
     // Problem: Speichern von current_value in nächstem geeigneten
   }
-}
 
-return index;
+  return index;
 }  // namespace stroupo
 
-size_type node_index(const key_type& key) const noexcept {
+size_type
+node_index(const key_type& key) const noexcept {
   hasher hash{};
   size_type index = hash(key) % data.size();
   while (!data[index].empty && key != data[index].key)
@@ -109,8 +105,7 @@ void resize(size_type new_size) {
 
 std::vector<entry> data;
 size_type load{0};
-}
-;
+};  // namespace stroupo
 
 }  // namespace stroupo
 
