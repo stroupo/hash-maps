@@ -31,13 +31,21 @@ Otherwise change the CMake installation prefix or use `sudo`.
 
     cmake --build . --target install
 
-    
-
 ## Execution
 In the directory `build`, that was created for building the actual binaries, run the following commands.
     
     ./main
 
+## Usage in other CMake projects
+
+One can find the installed package by the following command.
+```cmake
+    find_package(hash_map CONFIG REQUIRED)
+```
+For linking against it, one has to use the namespace `stroupo`.
+```cmake
+    target_link_libraries(${TARGET_NAME} PRIVATE/PUBLIC/INTERFACE stroupo::hash_map)
+```
 
 ## Todo
 - Create a CMake package out of the generated library. So there should be three different ways for including another project in your own one.
