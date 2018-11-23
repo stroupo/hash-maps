@@ -23,8 +23,8 @@ class hash_map {
     entry(const std::pair<key_type, mapped_type>& v)
         : entry{v.first, v.second} {}
 
-    key_type key{0};
-    mapped_type value{0};
+    key_type key{};
+    mapped_type value{};
     bool empty{true};
   };
 
@@ -50,60 +50,67 @@ class hash_map {
   // LOOKUP
   mapped_type& operator[](const key_type& key) {
     const auto index = node_index(key);
-    if (data[index].empty) // Stop wenn leer
+    if (data[index].empty)  // Stop wenn leer
       throw std::runtime_error{"This key was not inserted!"};
     return data[index].value;
   }
-  // Vergleich der Abstände
-  bool probelength (const size_type& current_index, const key_type& key) const noexcept {
-    hasher hash{}
-    const int current_length = current_index - (hash(data[current_index].key) % data.size()) // Abstand des gespeicherten Values zu einen ursprünglichen Hash-Wert
-    size_type length = current_index - (hash(key) % data.size())
-    if (current_length < length)
-    return true;
+
+  // COLLISION RESOLUTION
+  const int probelength(const size_type& current_index,
+                        const key_type& key) const noexcept {
+    hasher hash {}
+    const int current_length =
+        current_index - (hash(data[current_index].key) %
+                         data.size())  // Abstand des gespeicherten Values zu
+                                       // einen ursprünglichen Hash-Wert
+        size_type length =
+            current_index -
+            (hash(key) % data.size()) if (current_length < length) return true;
   }
 
-  size_type robin_hood(const key_type& key) const noexcept {
+  size_type robin_hood(const value_type& value) const noexcept {
     hasher hash{};
-    value_type current_value;
-    size_type index = hash(key) % data.size();
-    while(!data[index].empty){
-      if (probelength(data[index], key)==false && key != data[index].key)){
-        index = (index + 1) % data.size();
+    size_type index = hash(value.first) % data.size();
+
+    while (!data[index].empty && key != data[index].key) {
+      value_type old_value = data[index] if (probe_length(old_value.first) <
+                                             probe_length(new_value.first)) {
+        swapped_value = old_value;
+        data[index] = new_value;  // how to overload new_value
+        new_value = swapped_value;
       }
-      else {
-        data.[index].swap(current_value);
-        return index
-        // Problem: Speichern von current_value in nächstem geeigneten
-      }
-    }
-
-    return index;
-
-
-  }
-
-  size_type node_index(const key_type& key) const noexcept {
-    hasher hash{};
-    size_type index = hash(key) % data.size();
-    while (!data[index].empty && key != data[index].key)
       index = (index + 1) % data.size();
-    return index;
-  }
-
-  void resize(size_type new_size) {
-    std::vector<entry> old_data(new_size);
-    data.swap(old_data);
-    for (auto e : old_data) {
-      if (e.empty) continue;
-      const auto index = node_index(e.key);
-      data[index] = e;
     }
+    return index;
+    // Problem: Speichern von current_value in nächstem geeigneten
   }
+}
 
-  std::vector<entry> data;
-  size_type load{0};
-};
+return index;
+}  // namespace stroupo
+
+size_type node_index(const key_type& key) const noexcept {
+  hasher hash{};
+  size_type index = hash(key) % data.size();
+  while (!data[index].empty && key != data[index].key)
+    index = (index + 1) % data.size();
+  return index;
+}
+
+void resize(size_type new_size) {
+  std::vector<entry> old_data(new_size);
+  data.swap(old_data);
+  for (auto e : old_data) {
+    if (e.empty) continue;
+    const auto index = node_index(e.key);
+    data[index] = e;
+  }
+}
+
+std::vector<entry> data;
+size_type load{0};
+}
+;
 
 }  // namespace stroupo
 
