@@ -1,60 +1,72 @@
 cmake_minimum_required(VERSION 3.11)
-project(hash_map VERSION 0.1.0 LANGUAGES CXX)
+
+project(hash_map
+  VERSION 0.1.0
+  LANGUAGES CXX
+)
+set(PROJECT_NAMESPACE "stroupo")
 
 # Build system
-add_library(hash_map INTERFACE)
-# set_target_properties(hash_map
-#   PROPERTIES
-#     PUBLIC_HEADER hash_map.h
-# )
-target_include_directories(hash_map
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME}
   INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
 )
-target_compile_features(hash_map
-  INTERFACE
-    cxx_std_17
+target_compile_features(${PROJECT_NAME}
+  INTERFACE cxx_std_17
 )
-add_library(stroupo::hash_map ALIAS hash_map)
+add_library(${PROJECT_NAMESPACE}::${PROJECT_NAME}
+  ALIAS ${PROJECT_NAME}
+)
 
 # Testing
-enable_testing()
 add_subdirectory(tests)
 
 # Package installation
+set(config_install_dir "lib/cmake/${PROJECT_NAME}")
+set(version_config "${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${PROJECT_NAME}Config.cmake") # this file is already given
+set(targets_export_name "${PROJECT_NAME}Targets")
+
 install(
-  TARGETS hash_map
-  EXPORT hash_mapTargets
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${targets_export_name}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
-  # PUBLIC_HEADER DESTINATION include/stroupo/hash_map
 )
+
+# install(
+#   FILES hash_map.h
+#   DESTINATION include/${PROJECT_NAME}
+# )
 install(
-  FILES
-    hash_map.h
-  DESTINATION
-    include/hash_map
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN "tests/*" EXCLUDE
+  PATTERN "tests" EXCLUDE
 )
 
 install(
-  EXPORT hash_mapTargets
-  NAMESPACE stroupo::
-  DESTINATION lib/cmake/hash_map
+  EXPORT ${targets_export_name}
+  NAMESPACE ${PROJECT_NAMESPACE}::
+  DESTINATION ${config_install_dir}
 )
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-  hash_mapConfigVersion.cmake
-  VERSION 0.1.0
+  ${version_config}
+  VERSION ${PROJECT_VERSION}
   COMPATIBILITY SameMajorVersion
 )
+
 install(
   FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/hash_mapConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/hash_mapConfigVersion.cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/${project_config}
+    ${CMAKE_CURRENT_BINARY_DIR}/${version_config}
   DESTINATION
-    lib/cmake/hash_map
+    ${config_install_dir}
 )
 

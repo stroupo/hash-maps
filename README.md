@@ -20,10 +20,18 @@ Run the following commands in the source directory.
     cmake --build .
 
 ## Testing
-In the directory `build`, that was created for building the actual binaries, run the following commands.
+In the directory `build`, that was created for building the actual binaries, run the following command.
 
-    cd hash_map
     ctest --verbose
+
+## Installation
+In the directory `build`, that was created for building the actual binaries, run the following command to install the compiled libraries.
+Make sure that you have the permissions to install system libraries.
+Otherwise change the CMake installation prefix or use `sudo`.
+
+    cmake --build . --target install
+
+    
 
 ## Execution
 In the directory `build`, that was created for building the actual binaries, run the following commands.
