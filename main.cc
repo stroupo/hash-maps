@@ -3,7 +3,7 @@
 #include <iostream>
 #include <random>
 
-#include <hash_map.h>
+#include <hash_map/hash_map.h>
 
 struct custom_hash {
   std::size_t operator()(int key) const noexcept { return key; }

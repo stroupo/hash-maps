@@ -1,8 +1,9 @@
 *
-!*/
 !.circleci/**
+!hash_map
 !*.cc
 !*.h
+!*.cmake
 !CMakeLists.txt
 !README.md
 !.gitignore
