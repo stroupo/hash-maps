@@ -1,10 +1,12 @@
 *
 !.circleci/**
 !hash_map
+!hash_map/*
 !*.cc
 !*.h
 !*.cmake
 !*.pc.in
+!*.cmake.in
 !CMakeLists.txt
 !README.md
 !.gitignore

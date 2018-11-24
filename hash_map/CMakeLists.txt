@@ -47,9 +47,10 @@ install(
 install(
   DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DESTINATION include
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN "tests/*" EXCLUDE
+  FILES_MATCHING
+  PATTERN "*.h"
   PATTERN "tests" EXCLUDE
+  PATTERN "cmake" EXCLUDE
 )
 
 install(
@@ -59,6 +60,11 @@ install(
 )
 
 include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  cmake/${project_config}.in
+  ${project_config}
+  INSTALL_DESTINATION ${config_install_dir}
+)
 write_basic_package_version_file(
   ${version_config}
   VERSION ${PROJECT_VERSION}
@@ -67,14 +73,18 @@ write_basic_package_version_file(
 
 install(
   FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/${project_config}
+    ${CMAKE_CURRENT_BINARY_DIR}/${project_config}
     ${CMAKE_CURRENT_BINARY_DIR}/${version_config}
   DESTINATION
     ${config_install_dir}
 )
 
 # pkgconfig installation
-configure_file(${PROJECT_NAME}.pc.in ${PROJECT_NAME}.pc @ONLY)
+configure_file(
+  cmake/${PROJECT_NAME}.pc.in
+  ${PROJECT_NAME}.pc
+  @ONLY
+)
 install(
   FILES
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
