@@ -4,6 +4,7 @@
 !*.cc
 !*.h
 !*.cmake
+!*.pc.in
 !CMakeLists.txt
 !README.md
 !.gitignore

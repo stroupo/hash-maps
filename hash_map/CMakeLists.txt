@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.11)
 project(hash_map
   VERSION 0.1.0
   LANGUAGES CXX
+  DESCRIPTION
+    "A stroupo library with different implementations for hash maps."
 )
 set(PROJECT_NAMESPACE "stroupo")
 
@@ -27,6 +29,7 @@ set(config_install_dir "lib/cmake/${PROJECT_NAME}")
 set(version_config "${PROJECT_NAME}ConfigVersion.cmake")
 set(project_config "${PROJECT_NAME}Config.cmake") # this file is already given
 set(targets_export_name "${PROJECT_NAME}Targets")
+set(pkgconfig_install_dir "lib/pkgconfig")
 
 install(
   TARGETS ${PROJECT_NAME}
@@ -70,3 +73,11 @@ install(
     ${config_install_dir}
 )
 
+# pkgconfig installation
+configure_file(${PROJECT_NAME}.pc.in ${PROJECT_NAME}.pc @ONLY)
+install(
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
+  DESTINATION
+    ${pkgconfig_install_dir}
+)
