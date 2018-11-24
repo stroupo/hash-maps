@@ -46,22 +46,6 @@ float measure(Function function)
 	return elapsed;
 }
 
-
-std::vector<int> makeShuffledVectorInt(int size)
-{
-	std::vector<int> vec(size);
-	std::iota(vec.begin(), vec.end(), 0);
-	auto rng = std::default_random_engine {};
-	std::shuffle(std::begin(vec), std::end(vec), rng);
-	return vec;
-}
-
-std::vector<std::string> makeShuffledVectorString(int size)
-{
-	std::vector<std::string> vec(size);
-	return vec;
-}
-
 struct makeUniqueString
 {
 	makeUniqueString(
@@ -98,35 +82,46 @@ std::vector<std::string> makeUniqueVector<std::string>(int size)
 }
 template<typename T> 
 std::vector<T> makeVector(int size,
-	  					  bool shuffle=true,
-	  					  bool unique=true,
-	  					  float share=0.7)
+	  					  float non_unique = 0.0f)
 {
-	return makeUniqueVector<T>(size);
+	std::vector<T> vec = makeUniqueVector<T>(size);
+
+	std::random_device rd;
+	std::mt19937 rng(rd());
+	std::uniform_int_distribution<int> uni(0, vec.size() - 1);
+
+	if(non_unique > 0.0f)
+	{
+		int mults = (int) std::floor(non_unique * size);
+		std::transform(
+				vec.begin(),
+				vec.begin() + mults,
+				vec.begin(),
+				[&vec, &uni, &rng](T i){return vec[uni(rng)];});
+	}
+	std::shuffle(vec.begin(), vec.end(), rng);
+	return vec;
+
 }
 int main()
 {
-	std::vector<int> vec = makeVector<int>((int) 1E4);
-	std::vector<std::string> vec2 = makeVector<std::string>((int) 1E4);
+	// typedef std::string T;
+	typedef std::string T;
+	std::vector<T> vec = makeVector<T>((int) 1E4);
 	
-	std::unordered_map<int, int> stl_hm;
+	std::unordered_map<T, int, std::hash<T>> stl_hm;
 	auto function = mf_sequential_insertion_unique(stl_hm, vec);
 	float elapsed = measure(function);
 	std::cout << elapsed << std::endl;
 
-	boost::unordered_map<int, int> boost_hm;
+	boost::unordered_map<T, int, std::hash<T>> boost_hm;
 	elapsed = measure(mf_sequential_insertion_unique(boost_hm, vec));
 	std::cout << elapsed << std::endl;
 
-	// std::vector<int> vi = makeUniqueVector<int>(10);
-	std::vector<std::string> vs = makeUniqueVector<std::string>(10);
-
-	makeUniqueString mus;
-	makeUniqueString mus2;
-	for(int i=0;i<10;i++)
-	{
-		std::cout << vs[i] << std::endl;
-		// std::cout << mus() << std::endl;
-		// std::cout << mus2() << std::endl;
-	}
+	// int size=10;
+	// std::vector<std::string> vec = makeVector<std::string>(size);
+	// for(int i=0; i<size; i++)
+	// {
+	// 	std::cout << vec[i] << std::endl;
+	// }
 }
