@@ -13,7 +13,7 @@ class hash_map {
  public:
   using key_type = Key;
   using mapped_type = T;
-  using value_type = std::pair<const Key, T>;
+  using value_type = std::pair<Key, T>;
   using hasher = Hash;
 
   struct entry {
@@ -40,14 +40,22 @@ class hash_map {
   size_type max_size() const { return container::max_size(); }
 
   // MODIFIERS
-  void insert(const value_type& value) {
-    const auto index = node_index(value.first);
-    if (data[index].empty) ++load;
-    data[index] = {value};  // use implicit conversion
-    if (static_cast<float>(load) / data.size() >= max_load_factor())
-      resize(2 * data.size());
-  }
+  // void insert(const value_type& value) {
+  //   const auto index = node_index(value.first);
+  //   if (data[index].empty) ++load;
+  //   data[index] = {value};  // use implicit conversion
+  //   if (static_cast<float>(load) / data.size() >= max_load_factor())
+  //     resize(2 * data.size());
+  // }
   // LOOKUP
+  size_type node_index(const key_type& key) const noexcept {
+    hasher hash{};
+    size_type index = hash(key) % data.size();
+    while (!data[index].empty && key != data[index].key)
+      index = (index + 1) % data.size();
+    return index;
+  }
+
   mapped_type& operator[](const key_type& key) {
     const auto index = node_index(key);
     if (data[index].empty)  // Stop wenn leer
@@ -56,55 +64,48 @@ class hash_map {
   }
 
   // COLLISION RESOLUTION
-  const int probe_length(const size_type& current_index,
+  size_type probe_length(const size_type& current_index,
                          const key_type& key) const noexcept {
-    hasher hash {}
-    const int current_length = return current_index - (hash(key) % data.size());
+    hasher hash{};
+    if (hash(key) % data.size() <= current_index) {
+      return current_index - hash(key) % data.size();
+    } else {
+      return data.size() - hash(key) % data.size() + current_index;
+    }
   }
 
-  size_type robin_hood(const value_type& value) const noexcept {
+  void insert(const value_type& value) {
     hasher hash{};
     size_type index = hash(value.first) % data.size();
     value_type new_value = value;
 
-    while (!data[index].empty && key != data[index].key) {
-      value_type old_value = data[index];  // is swap better?
-      if (probe_length(index, old_value.first) <
+    while (!data[index].empty && new_value.first != data[index].key) {
+      if (probe_length(index, data[index].key) <
           probe_length(index, new_value.first)) {
-        value_type swapped_value = old_value;  // or should we swap here?
-        data[index] = {new_value};             // how to overload new_value
-        new_value = swapped_value;  // is it correct not to declare here?
+        std::swap(new_value.first, data[index].key);
+        std::swap(new_value.second, data[index].value);
       }
       index = (index + 1) % data.size();
     }
-    return index, new_value;
-    // Problem: Speichern von current_value in nächstem geeigneten
+
+    if (data[index].empty) ++load;
+    data[index] = {new_value};  // use implicit conversion
+    if (static_cast<float>(load) / data.size() >= max_load_factor())
+      resize(2 * data.size());
   }
 
-  return index;
-}  // namespace stroupo
-
-size_type
-node_index(const key_type& key) const noexcept {
-  hasher hash{};
-  size_type index = hash(key) % data.size();
-  while (!data[index].empty && key != data[index].key)
-    index = (index + 1) % data.size();
-  return index;
-}
-
-void resize(size_type new_size) {
-  std::vector<entry> old_data(new_size);
-  data.swap(old_data);
-  for (auto e : old_data) {
-    if (e.empty) continue;
-    const auto index = node_index(e.key);
-    data[index] = e;
+  void resize(size_type new_size) {
+    std::vector<entry> old_data(new_size);
+    data.swap(old_data);
+    for (auto e : old_data) {
+      if (e.empty) continue;
+      const auto index = node_index(e.key);
+      data[index] = e;
+    }
   }
-}
 
-std::vector<entry> data;
-size_type load{0};
+  std::vector<entry> data;
+  size_type load{0};
 };  // namespace stroupo
 
 }  // namespace stroupo
