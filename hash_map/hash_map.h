@@ -87,7 +87,6 @@ class hash_map {
       }
       index = (index + 1) % data.size();
     }
-
     if (data[index].empty) ++load;
     data[index] = {new_value};  // use implicit conversion
     if (static_cast<float>(load) / data.size() >= max_load_factor())
