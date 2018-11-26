@@ -4,8 +4,8 @@ if(NOT TARGET stroupo::hash_map)
   find_package(hash_map CONFIG REQUIRED)
 endif()
 
-add_executable(main main.cc)
-target_link_libraries(main PRIVATE stroupo::hash_map)
+add_executable(package_test main.cc)
+target_link_libraries(package_test PRIVATE stroupo::hash_map)
 
 enable_testing()
-add_test(main main)
+add_test(package_test package_test)
