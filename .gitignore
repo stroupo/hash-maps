@@ -9,5 +9,6 @@
 !*.pc.in
 !*.cmake.in
 !CMakeLists.txt
+!meson.build
 !README.md
 !.gitignore

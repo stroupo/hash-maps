@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <iostream>
 #include <random>
+#include <utility>
 
 #include <hash_map/hash_map.h>
 
@@ -79,4 +80,6 @@ int main(int argc, char** argv) {
             << sizeof(hash_map<int, int, bit_reversal_hash>) << std::endl
             << "sizeof(bit_reversal_hash) = " << sizeof(bit_reversal_hash)
             << std::endl;
+
+  std::pair{1, 2};
 }
