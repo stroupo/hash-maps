@@ -2,12 +2,18 @@ version: 2
 
 workflows:
   version: 2
-  build_and_test:
+  build_test_install:
     jobs:
       - build
       - test:
           requires:
             - build
+      - install:
+          requires:
+            - build
+      - install_test:
+          requires:
+            - install
 
 jobs:
   build:
@@ -38,4 +44,38 @@ jobs:
           name: test
           command: |
             cd build
+            ctest --verbose
+
+  install:
+    docker:
+      - image: lyrahgames/gcc-cmake-eigen-doctest:latest
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: install
+          command: |
+            cd build
+            cmake --build . --target install
+      - persist_to_workspace:
+          root: /
+          paths:
+            - usr/local
+
+  install_test:
+    docker:
+      - image: lyrahgames/gcc-cmake-eigen-doctest:latest
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /
+      - run:
+          name: install_test
+          command: |
+            cd tests
+            mkdir build
+            cd build
+            cmake ..
+            cmake --build .
             ctest --verbose

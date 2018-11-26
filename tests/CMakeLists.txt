@@ -6,3 +6,6 @@ endif()
 
 add_executable(main main.cc)
 target_link_libraries(main PRIVATE stroupo::hash_map)
+
+enable_testing()
+add_test(main main)
