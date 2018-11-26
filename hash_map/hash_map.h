@@ -13,7 +13,7 @@ class hash_map {
  public:
   using key_type = Key;
   using mapped_type = T;
-  using value_type = std::pair<Key, T>;
+  using value_type = std::pair<const Key, T>;
   using hasher = Hash;
 
   struct entry {
@@ -22,6 +22,7 @@ class hash_map {
         : key{k}, value{v}, empty{false} {}
     entry(const std::pair<key_type, mapped_type>& v)
         : entry{v.first, v.second} {}
+    entry(const value_type& v) : entry{v.first, v.second} {}
 
     key_type key{};
     mapped_type value{};
@@ -33,21 +34,11 @@ class hash_map {
 
   hash_map() : data(2) {}
 
-  // CAPACITY
   constexpr static float max_load_factor() { return 0.7; }
   bool empty() const { return load == (size_type)0; }
   size_type size() const { return load; }
   size_type max_size() const { return container::max_size(); }
 
-  // MODIFIERS
-  // void insert(const value_type& value) {
-  //   const auto index = node_index(value.first);
-  //   if (data[index].empty) ++load;
-  //   data[index] = {value};  // use implicit conversion
-  //   if (static_cast<float>(load) / data.size() >= max_load_factor())
-  //     resize(2 * data.size());
-  // }
-  // LOOKUP
   size_type node_index(const key_type& key) const noexcept {
     hasher hash{};
     size_type index = hash(key) % data.size();
@@ -63,7 +54,6 @@ class hash_map {
     return data[index].value;
   }
 
-  // COLLISION RESOLUTION
   size_type probe_length(const size_type& current_index,
                          const key_type& key) const noexcept {
     hasher hash{};
@@ -77,18 +67,19 @@ class hash_map {
   void insert(const value_type& value) {
     hasher hash{};
     size_type index = hash(value.first) % data.size();
-    value_type new_value = value;
+    entry new_entry = value;
 
-    while (!data[index].empty && new_value.first != data[index].key) {
+    while (!data[index].empty && new_entry.key != data[index].key) {
       if (probe_length(index, data[index].key) <
-          probe_length(index, new_value.first)) {
-        std::swap(new_value.first, data[index].key);
-        std::swap(new_value.second, data[index].value);
+          probe_length(index, new_entry.key)) {
+        std::swap(new_entry, data[index]);
       }
       index = (index + 1) % data.size();
     }
+
     if (data[index].empty) ++load;
-    data[index] = {new_value};  // use implicit conversion
+    data[index] = new_entry;
+
     if (static_cast<float>(load) / data.size() >= max_load_factor())
       resize(2 * data.size());
   }
@@ -105,7 +96,7 @@ class hash_map {
 
   std::vector<entry> data;
   size_type load{0};
-};  // namespace stroupo
+};
 
 }  // namespace stroupo
 
