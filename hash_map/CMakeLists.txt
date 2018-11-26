@@ -15,20 +15,21 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Building
-add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}
+  INTERFACE
+)
 target_include_directories(${PROJECT_NAME}
   INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
 )
 target_compile_features(${PROJECT_NAME}
-  INTERFACE cxx_std_17
+  INTERFACE
+    cxx_std_17
 )
 add_library(${PROJECT_NAMESPACE}::${PROJECT_NAME}
-  ALIAS ${PROJECT_NAME}
+  ALIAS
+    ${PROJECT_NAME}
 )
-
-# Testing
-add_subdirectory(tests)
 
 # Deploying
 include(${PROJECT_NAME}Install)

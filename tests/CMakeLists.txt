@@ -1,11 +1,22 @@
 cmake_minimum_required(VERSION 3.10)
+enable_testing()
 
+find_package(doctest REQUIRED)
 if(NOT TARGET stroupo::hash_map)
   find_package(hash_map CONFIG REQUIRED)
 endif()
 
-add_executable(package_test main.cc)
-target_link_libraries(package_test PRIVATE stroupo::hash_map)
+add_executable(main_test
+  doctest_main.cc
+  hash_map.cc
+)
 
-enable_testing()
-add_test(package_test package_test)
+target_link_libraries(main_test
+  PRIVATE
+    doctest::doctest
+    stroupo::hash_map
+)
+
+add_test(hash_map_test
+  main_test --source-file=${CMAKE_CURRENT_SOURCE_DIR}/hash_map.cc
+)
