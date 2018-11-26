@@ -8,6 +8,9 @@ workflows:
       - test:
           requires:
             - build
+      - export_test:
+          requires:
+            - build
       - install:
           requires:
             - build
@@ -44,6 +47,25 @@ jobs:
           name: test
           command: |
             cd build
+            ctest --verbose
+
+  export_test:
+    docker:
+      - image: lyrahgames/gcc-cmake-eigen-doctest:latest
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: export_test
+          command: |
+            cd build
+            cmake ..
+            cd ../tests
+            mkdir build
+            cd build
+            cmake ..
+            cmake --build .
             ctest --verbose
 
   install:
