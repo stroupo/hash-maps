@@ -103,3 +103,11 @@ add_custom_target(
   COMMAND
     ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Uninstall.cmake
 )
+
+# export
+export(
+  TARGETS ${PROJECT_NAME}
+  NAMESPACE ${PROJECT_NAMESPACE}::
+  FILE ${targets_export_name}.cmake
+)
+export(PACKAGE ${PROJECT_NAME})
