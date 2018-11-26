@@ -25,11 +25,17 @@ In the directory `build`, that was created for building the actual binaries, run
     ctest --verbose
 
 ## Installation
-In the directory `build`, that was created for building the actual binaries, run the following command to install the compiled libraries.
+In the directory `build`, that was created for building the actual binaries, run the following command to install the compiled libraries together with the CMake package.
 Make sure that you have the permissions to install system libraries.
 Otherwise change the CMake installation prefix or use `sudo`.
 
     cmake --build . --target install
+
+## Uninstallation
+In the directory `build`, that was created for building and installing the actual binaries, run the following command to uninstall the compiled libraries.
+Make sure that you have the permissions to remove system libraries.
+    
+    cmake --build . --target uninstall
 
 ## Execution
 In the directory `build`, that was created for building the actual binaries, run the following commands.
@@ -46,6 +52,9 @@ For linking against it, one has to use the namespace `stroupo`.
 ```cmake
     target_link_libraries(${TARGET_NAME} PRIVATE/PUBLIC/INTERFACE stroupo::hash_map)
 ```
+Note that the installation of the library is not required to find and use the CMake package.
+After building the source code of the project CMake exports a local package configuration which refers to the current build directory.
+As long as this build directory exists the commands written above can be used to find the library.
 
 ## Todo
 - Create a CMake package out of the generated library. So there should be three different ways for including another project in your own one.
