@@ -1,5 +1,26 @@
 # Hash Maps
 
+<b>
+<table>
+    <tr>
+        <td>
+            master
+        </td>
+        <td>
+            Linux <a href="https://circleci.com/gh/stroupo/hash-maps/tree/master"><img src="https://circleci.com/gh/stroupo/hash-maps/tree/master.svg?style=svg"></a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            development
+        </td>
+        <td>
+            Linux
+        </td>
+    </tr>
+</table>
+</b>
+
 ## Installing doctest
 Run the following commands in a directory appropriate for temporarily saving source code and build configurations.
 
