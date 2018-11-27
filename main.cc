@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
   }
   std::cout << std::endl;
 
-  map.resize(15);
+  map.reserve(15);
 
   for (int i = 0; i < map.data.size(); ++i) {
     std::cout << i << ":\t";

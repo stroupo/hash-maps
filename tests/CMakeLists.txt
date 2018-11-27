@@ -18,5 +18,5 @@ target_link_libraries(main_test
 )
 
 add_test(hash_map_test
-  main_test --source-file=${CMAKE_CURRENT_SOURCE_DIR}/hash_map.cc
+  main_test
 )
