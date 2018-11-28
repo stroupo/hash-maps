@@ -117,6 +117,26 @@ TEST_CASE("The hash map") {
     CHECK(map_ref.at(3) == 5);
     CHECK_THROWS_AS(map_ref.at(4), std::out_of_range);
   }
+
+  SUBCASE("") {
+    using namespace std;
+
+    vector<pair<key_type, mapped_type>> data{
+        {1, 1}, {2, 2}, {4, 4}, {5, 5}, {10, 10}};
+    hash_map map{};
+    map.insert(begin(data), end(data));
+
+    vector<pair<key_type, mapped_type>> read{};
+    for (auto it = begin(map); it != end(map); ++it) {
+      read.push_back({it->first, it->second});
+    }
+    sort(begin(read), end(read),
+         [](const hash_map::value_type& x, const hash_map::value_type& y) {
+           return x.first < y.first;
+         });
+
+    CHECK(data == read);
+  }
 }
 
 SCENARIO(

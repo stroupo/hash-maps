@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <functional>
+#include <iterator>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -17,6 +18,7 @@ class hash_map {
   using key_type = Key;
   using mapped_type = T;
   using value_type = std::pair<const Key, T>;
+  // using value_type = std::pair<Key, T>;
   using hasher = Hash;
   using key_equal = Key_equal;
   using allocator_type = Allocator;
@@ -35,20 +37,43 @@ class hash_map {
 
   using container = std::vector<entry>;
   using size_type = typename container::size_type;
+  using difference_type = std::ptrdiff_t;
+  using reference = value_type&;
+  using const_reference = const value_type&;
+  using pointer = typename std::allocator_traits<allocator_type>::pointer;
+  using const_pointer =
+      typename std::allocator_traits<allocator_type>::const_pointer;
   using real_type = float;
+  // using const_iterator = ;
 
   struct iterator {
+    using value_type = hash_map::value_type;
+    using difference_type = std::ptrdiff_t;
+    using reference = value_type&;
+    using pointer = value_type*;
+    using iterator_category = std::forward_iterator_tag;
+
     iterator& operator++() {
-      while ((++pointer)->empty) {
+      while ((++pointer_)->empty) {
       }
+      return *this;
     }
 
-    entry& operator*() { return *pointer; }
+    // iterator& operator++(int x) {}
 
-    entry* pointer;
+    auto operator*() { return *reinterpret_cast<value_type*>(pointer_); }
+    auto operator-> () { return reinterpret_cast<value_type*>(pointer_); }
+
+    bool operator==(iterator it) const { return pointer_ == it.pointer_; }
+    bool operator!=(iterator it) const { return !(*this == it); }
+
+    entry* pointer_;
   };
 
-  hash_map() : data(2) {}
+  hash_map() : data(2) {
+    data.reserve(3);
+    data[2].empty = false;
+  }
 
   real_type max_load_factor() const { return max_load_factor_; }
   void max_load_factor(real_type ml) { max_load_factor_ = ml; }
@@ -59,6 +84,11 @@ class hash_map {
   size_type size() const { return load_; }
   size_type capacity() const { return data.size(); }
   static size_type max_size() noexcept { return container::max_size(); }
+
+  auto begin() {
+    return (data[0].empty) ? (++iterator{&data[0]}) : (iterator{&data[0]});
+  }
+  auto end() { return iterator{&data[data.size()]}; }
 
   void insert(const value_type& value);
   template <typename Iterator>
@@ -97,6 +127,8 @@ template <typename Key, typename T, typename Hash, typename Key_equal,
           typename Allocator>
 void hash_map<Key, T, Hash, Key_equal, Allocator>::rehash(size_type count) {
   container old_data(count);
+  old_data.reserve(count + 1);
+  old_data[count].empty = false;
   data.swap(old_data);
   for (auto e : old_data)
     if (!e.empty) data[node_index(e.key)] = e;
