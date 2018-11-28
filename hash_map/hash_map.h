@@ -37,6 +37,17 @@ class hash_map {
   using size_type = typename container::size_type;
   using real_type = float;
 
+  struct iterator {
+    iterator& operator++() {
+      while ((++pointer)->empty) {
+      }
+    }
+
+    entry& operator*() { return *pointer; }
+
+    entry* pointer;
+  };
+
   hash_map() : data(2) {}
 
   real_type max_load_factor() const { return max_load_factor_; }
@@ -50,6 +61,12 @@ class hash_map {
   static size_type max_size() noexcept { return container::max_size(); }
 
   void insert(const value_type& value);
+  template <typename Iterator>
+  void insert(Iterator first, Iterator last);
+  template <typename Key_iterator, typename T_iterator>
+  void insert(Key_iterator keys_first, Key_iterator keys_last,
+              T_iterator first);
+
   mapped_type& operator[](const key_type& key);
   const mapped_type& at(const key_type& key) const;
   mapped_type& at(const key_type& key) {
@@ -63,7 +80,7 @@ class hash_map {
   container data;
   size_type load_{0};
   real_type max_load_factor_{0.7};
-};
+};  // namespace stroupo
 
 template <typename Key, typename T, typename Hash, typename Key_equal,
           typename Allocator>
@@ -110,7 +127,11 @@ auto hash_map<Key, T, Hash, Key_equal, Allocator>::operator[](
   if (data[index].empty) {
     ++load_;
     data[index] = {key, mapped_type{}};
-    if (load_ >= data.size() * max_load_factor()) rehash(2 * data.size());
+    if (load_ >= data.size() * max_load_factor()) {
+      rehash(2 * data.size());
+      // index was invalidated through rehash
+      return data[node_index(key)].value;
+    }
   }
   return data[index].value;
 }
@@ -123,6 +144,24 @@ auto hash_map<Key, T, Hash, Key_equal, Allocator>::at(const key_type& key) const
   if (data[index].empty)
     throw std::out_of_range{"The given key was not inserted!"};
   return data[index].value;
+}
+
+template <typename Key, typename T, typename Hash, typename Key_equal,
+          typename Allocator>
+template <typename Iterator>
+void hash_map<Key, T, Hash, Key_equal, Allocator>::insert(Iterator first,
+                                                          Iterator last) {
+  for (auto it = first; it != last; ++it) (*this)[it->first] = it->second;
+}
+
+template <typename Key, typename T, typename Hash, typename Key_equal,
+          typename Allocator>
+template <typename Key_iterator, typename T_iterator>
+void hash_map<Key, T, Hash, Key_equal, Allocator>::insert(
+    Key_iterator keys_first, Key_iterator keys_last, T_iterator first) {
+  auto it = first;
+  for (auto key_it = keys_first; key_it != keys_last; ++key_it, ++it)
+    (*this)[*key_it] = *it;
 }
 
 }  // namespace stroupo

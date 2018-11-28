@@ -1,6 +1,9 @@
 #include <doctest/doctest.h>
 
+#include <algorithm>
+#include <random>
 #include <type_traits>
+#include <vector>
 
 #include <hash_map/hash_map.h>
 
@@ -12,13 +15,13 @@ struct custom_equal_to {
   constexpr bool operator()(int lhs, int rhs) const { return 0 == lhs - rhs; }
 };
 
-TEST_CASE("The hash map") {
-  using key_type = int;
-  using mapped_type = int;
-  using hash_map = stroupo::hash_map<key_type, mapped_type>;
-  using custom_hash_map =
-      stroupo::hash_map<key_type, mapped_type, custom_hash, custom_equal_to>;
+using key_type = int;
+using mapped_type = int;
+using hash_map = stroupo::hash_map<key_type, mapped_type>;
+using custom_hash_map =
+    stroupo::hash_map<key_type, mapped_type, custom_hash, custom_equal_to>;
 
+TEST_CASE("The hash map") {
   static_assert(std::is_same_v<hash_map::key_type, key_type>,
                 "hash_map::key_type is not equal to key_type!");
   static_assert(std::is_same_v<hash_map::mapped_type, mapped_type>,
@@ -100,8 +103,12 @@ TEST_CASE("The hash map") {
     CHECK(map.at(3) == 5);
     CHECK_THROWS_AS(map.at(4), std::out_of_range);
 
+    CHECK(map.size() == 4);
+
     map.at(2) = 3;
     CHECK(map.at(2) == 3);
+
+    CHECK(map.size() == 4);
 
     const auto& map_ref = map;
     CHECK(map_ref.at(0) == 0);
@@ -109,5 +116,61 @@ TEST_CASE("The hash map") {
     CHECK(map_ref.at(2) == 3);
     CHECK(map_ref.at(3) == 5);
     CHECK_THROWS_AS(map_ref.at(4), std::out_of_range);
+  }
+}
+
+SCENARIO(
+    "The hash map can insert and access one or more values through "
+    "iterators.") {
+  using namespace std;
+
+  GIVEN("a default constructed hash map") {
+    hash_map map{};
+
+    GIVEN("some random vector containing values with unique keys") {
+      constexpr auto count = 1000;
+      mt19937 rng{random_device{}()};
+
+      vector<hash_map::key_type> keys(count);
+      iota(begin(keys), end(keys), -count / 2);
+      shuffle(begin(keys), end(keys), rng);
+
+      vector<hash_map::mapped_type> values(count);
+      generate(begin(values), end(values),
+               bind(uniform_int_distribution<int>{-count, count}, ref(rng)));
+
+      vector<hash_map::value_type> data{};
+      for (auto i = 0; i < count; ++i) data.push_back({keys[i], values[i]});
+
+      WHEN("the values are inserted") {
+        map.insert(begin(data), end(data));
+
+        THEN(
+            "for every value one gets a new element in the hash map with the "
+            "same key and value") {
+          CHECK(map.size() == data.size());
+          for (const auto& element : data) {
+            CHECK_MESSAGE(map.at(element.first) == element.second,
+                          "element = (" << element.first << ", "
+                                        << element.second << ")");
+          }
+        }
+      }
+
+      WHEN("keys and their values are inserted separately") {
+        map.insert(begin(keys), end(keys), begin(values));
+
+        THEN(
+            "for every key-value-pair one gets a new key-value-element in the "
+            "hash map.") {
+          CHECK(map.size() == keys.size());
+          for (auto i = 0; i < keys.size(); ++i) {
+            CHECK_MESSAGE(map.at(keys[i]) == values[i],
+                          "(keys[i], values[i]) = (" << keys[i] << ", "
+                                                     << values[i] << ")");
+          }
+        }
+      }
+    }
   }
 }
