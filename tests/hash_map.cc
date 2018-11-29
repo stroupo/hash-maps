@@ -117,26 +117,6 @@ TEST_CASE("The hash map") {
     CHECK(map_ref.at(3) == 5);
     CHECK_THROWS_AS(map_ref.at(4), std::out_of_range);
   }
-
-  SUBCASE("") {
-    using namespace std;
-
-    vector<pair<key_type, mapped_type>> data{
-        {1, 1}, {2, 2}, {4, 4}, {5, 5}, {10, 10}};
-    hash_map map{};
-    map.insert(begin(data), end(data));
-
-    vector<pair<key_type, mapped_type>> read{};
-    for (auto it = begin(map); it != end(map); ++it) {
-      read.push_back({it->first, it->second});
-    }
-    sort(begin(read), end(read),
-         [](const hash_map::value_type& x, const hash_map::value_type& y) {
-           return x.first < y.first;
-         });
-
-    CHECK(data == read);
-  }
 }
 
 SCENARIO(
@@ -189,6 +169,71 @@ SCENARIO(
                           "(keys[i], values[i]) = (" << keys[i] << ", "
                                                      << values[i] << ")");
           }
+        }
+      }
+    }
+  }
+
+  GIVEN("a hash map with some initial data") {
+    using element_type = pair<hash_map::key_type, hash_map::mapped_type>;
+    vector<element_type> data{{1, 1}, {2, 2}, {4, 4}, {5, 5}, {10, 10}};
+    hash_map map{};
+    map.insert(begin(data), end(data));
+    vector<element_type> read{};
+
+    WHEN("one iterates with iterators and helper functions") {
+      for (auto it = begin(map); it != end(map); ++it)
+        read.push_back({it->first, it->second});
+      THEN("every element in the hash map is reached in an undefined order") {
+        sort(begin(read), end(read));
+        CHECK(read == data);
+      }
+    }
+
+    WHEN("one iterates with iterators and member functions") {
+      for (auto it = map.begin(); it != map.end(); ++it)
+        read.push_back({it->first, it->second});
+      THEN("every element in the hash map is reached in an undefined order") {
+        sort(begin(read), end(read));
+        CHECK(read == data);
+      }
+    }
+
+    WHEN("one iterates with a range-based for loop") {
+      for (auto& element : map) read.push_back({element.first, element.second});
+      THEN("every element in the hash map is reached in an undefined order") {
+        sort(begin(read), end(read));
+        CHECK(read == data);
+      }
+    }
+
+    GIVEN("a constant reference to this hash map") {
+      const auto& map_ref = map;
+
+      WHEN("one iterates with iterators and helper functions") {
+        for (auto it = begin(map_ref); it != end(map_ref); ++it)
+          read.push_back({it->first, it->second});
+        THEN("every element in the hash map is reached in an undefined order") {
+          sort(begin(read), end(read));
+          CHECK(read == data);
+        }
+      }
+
+      WHEN("one iterates with iterators and member functions") {
+        for (auto it = map_ref.begin(); it != map_ref.end(); ++it)
+          read.push_back({it->first, it->second});
+        THEN("every element in the hash map is reached in an undefined order") {
+          sort(begin(read), end(read));
+          CHECK(read == data);
+        }
+      }
+
+      WHEN("one iterates with a range-based for loop") {
+        for (const auto& element : map_ref)
+          read.push_back({element.first, element.second});
+        THEN("every element in the hash map is reached in an undefined order") {
+          sort(begin(read), end(read));
+          CHECK(read == data);
         }
       }
     }

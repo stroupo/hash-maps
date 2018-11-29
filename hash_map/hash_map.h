@@ -5,6 +5,7 @@
 #include <functional>
 #include <iterator>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -44,31 +45,48 @@ class hash_map {
   using const_pointer =
       typename std::allocator_traits<allocator_type>::const_pointer;
   using real_type = float;
-  // using const_iterator = ;
 
-  struct iterator {
+  template <bool Constant_iterator>
+  class iterator_t {
+   public:
+    using iterator_category = std::forward_iterator_tag;
     using value_type = hash_map::value_type;
     using difference_type = std::ptrdiff_t;
-    using reference = value_type&;
-    using pointer = value_type*;
-    using iterator_category = std::forward_iterator_tag;
+    using reference =
+        std::conditional_t<Constant_iterator, const value_type&, value_type&>;
+    using pointer =
+        std::conditional_t<Constant_iterator, const value_type*, value_type*>;
+    using node_pointer =
+        std::conditional_t<Constant_iterator, const entry*, entry*>;
 
-    iterator& operator++() {
-      while ((++pointer_)->empty) {
+    // iterator_t() = default;
+    iterator_t(node_pointer n) : node_{n} {}
+    iterator_t(const iterator_t& it) = default;
+    iterator_t& operator=(const iterator_t& it) = default;
+    iterator_t(iterator_t&& it) = default;
+    iterator_t& operator=(iterator_t&& it) = default;
+    ~iterator_t() = default;
+
+    iterator_t& operator++() {
+      while ((++node_)->empty) {
       }
       return *this;
     }
 
-    // iterator& operator++(int x) {}
+    // iterator_t& operator++(int x) {}
 
-    auto operator*() { return *reinterpret_cast<value_type*>(pointer_); }
-    auto operator-> () { return reinterpret_cast<value_type*>(pointer_); }
+    reference operator*() const { return *reinterpret_cast<pointer>(node_); }
+    pointer operator->() const { return reinterpret_cast<pointer>(node_); }
 
-    bool operator==(iterator it) const { return pointer_ == it.pointer_; }
-    bool operator!=(iterator it) const { return !(*this == it); }
+    bool operator==(iterator_t it) const { return node_ == it.node_; }
+    bool operator!=(iterator_t it) const { return !(*this == it); }
 
-    entry* pointer_;
+   private:
+    node_pointer node_{nullptr};
   };
+
+  using iterator = iterator_t<false>;
+  using const_iterator = iterator_t<true>;
 
   hash_map() : data(2) {
     data.reserve(3);
@@ -85,10 +103,15 @@ class hash_map {
   size_type capacity() const { return data.size(); }
   static size_type max_size() noexcept { return container::max_size(); }
 
-  auto begin() {
+  auto begin() noexcept {
     return (data[0].empty) ? (++iterator{&data[0]}) : (iterator{&data[0]});
   }
-  auto end() { return iterator{&data[data.size()]}; }
+  auto begin() const noexcept {
+    return (data[0].empty) ? (++const_iterator{&data[0]})
+                           : (const_iterator{&data[0]});
+  }
+  auto end() noexcept { return iterator{&data[data.size()]}; }
+  auto end() const noexcept { return const_iterator{&data[data.size()]}; }
 
   void insert(const value_type& value);
   template <typename Iterator>
