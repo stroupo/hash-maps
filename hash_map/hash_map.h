@@ -19,7 +19,6 @@ class hash_map {
   using key_type = Key;
   using mapped_type = T;
   using value_type = std::pair<const Key, T>;
-  // using value_type = std::pair<Key, T>;
   using hasher = Hash;
   using key_equal = Key_equal;
   using allocator_type = Allocator;
@@ -125,6 +124,8 @@ class hash_map {
   mapped_type& at(const key_type& key) {
     return const_cast<mapped_type&>(const_cast<const hash_map*>(this)->at(key));
   }
+  iterator find(const key_type& key);
+  const_iterator find(const key_type& key) const;
   auto node_index(const key_type& key) const;
 
   void rehash(size_type count);
@@ -133,15 +134,16 @@ class hash_map {
   container data;
   size_type load_{0};
   real_type max_load_factor_{0.7};
-};  // namespace stroupo
+};
 
 template <typename Key, typename T, typename Hash, typename Key_equal,
           typename Allocator>
 auto hash_map<Key, T, Hash, Key_equal, Allocator>::node_index(
     const key_type& key) const {
   hasher hash{};
+  key_equal equal{};
   size_type index = hash(key) % data.size();
-  while (!data[index].empty && key != data[index].key)
+  while (!data[index].empty && !equal(key, data[index].key))
     index = (index + 1) % data.size();
   return index;
 }
@@ -217,6 +219,24 @@ void hash_map<Key, T, Hash, Key_equal, Allocator>::insert(
   auto it = first;
   for (auto key_it = keys_first; key_it != keys_last; ++key_it, ++it)
     (*this)[*key_it] = *it;
+}
+
+template <typename Key, typename T, typename Hash, typename Key_equal,
+          typename Allocator>
+auto hash_map<Key, T, Hash, Key_equal, Allocator>::find(const key_type& key)
+    -> iterator {
+  const auto index = node_index(key);
+  if (data[index].empty) return end();
+  return &data[index];
+}
+
+template <typename Key, typename T, typename Hash, typename Key_equal,
+          typename Allocator>
+auto hash_map<Key, T, Hash, Key_equal, Allocator>::find(
+    const key_type& key) const -> const_iterator {
+  const auto index = node_index(key);
+  if (data[index].empty) return end();
+  return &data[index];
 }
 
 }  // namespace stroupo

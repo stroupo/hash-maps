@@ -237,5 +237,99 @@ SCENARIO(
         }
       }
     }
+
+    SUBCASE(
+        "One can access elements through the member function 'find' which "
+        "returns an iterator to the element if it exists and the end iterator "
+        "if it does not.") {
+      auto it = map.find(1);
+      CHECK(it->first == 1);
+      CHECK(it->second == 1);
+
+      it = map.find(2);
+      CHECK(it->first == 2);
+      CHECK(it->second == 2);
+
+      it = map.find(3);
+      CHECK(it == end(map));
+      CHECK(it == map.end());
+
+      it = map.find(4);
+      CHECK(it->first == 4);
+      CHECK(it->second == 4);
+
+      it = map.find(5);
+      CHECK(it->first == 5);
+      CHECK(it->second == 5);
+
+      it = map.find(6);
+      CHECK(it == end(map));
+      CHECK(it == map.end());
+
+      it = map.find(7);
+      CHECK(it == end(map));
+      CHECK(it == map.end());
+
+      it = map.find(8);
+      CHECK(it == end(map));
+      CHECK(it == map.end());
+
+      it = map.find(9);
+      CHECK(it == end(map));
+      CHECK(it == map.end());
+
+      it = map.find(10);
+      CHECK(it->first == 10);
+      CHECK(it->second == 10);
+
+      GIVEN("a constant reference to this hash map") {
+        const auto& map_ref = map;
+
+        SUBCASE(
+            "One can access elements through the overloaded member function "
+            "'find' which returns a constant iterator to the element if it "
+            "exists and the end-iterator if it does not.") {
+          auto it = map_ref.find(1);
+          CHECK(it->first == 1);
+          CHECK(it->second == 1);
+
+          it = map_ref.find(2);
+          CHECK(it->first == 2);
+          CHECK(it->second == 2);
+
+          it = map_ref.find(3);
+          CHECK(it == end(map_ref));
+          CHECK(it == map_ref.end());
+
+          it = map_ref.find(4);
+          CHECK(it->first == 4);
+          CHECK(it->second == 4);
+
+          it = map_ref.find(5);
+          CHECK(it->first == 5);
+          CHECK(it->second == 5);
+
+          it = map_ref.find(6);
+          CHECK(it == end(map_ref));
+          CHECK(it == map_ref.end());
+
+          it = map_ref.find(7);
+          CHECK(it == end(map_ref));
+          CHECK(it == map_ref.end());
+
+          it = map_ref.find(8);
+          CHECK(it == end(map_ref));
+          CHECK(it == map_ref.end());
+
+          it = map_ref.find(9);
+          CHECK(it == end(map_ref));
+          CHECK(it == map_ref.end());
+
+          it = map_ref.find(10);
+          CHECK(it->first == 10);
+          CHECK(it->second == 10);
+        }
+      }
+    }
   }
 }
