@@ -7,6 +7,8 @@
 
 #include <hash_map/hash_map.h>
 
+using namespace std;
+
 struct custom_hash {
   constexpr std::size_t operator()(int key) const noexcept { return key; }
 };
@@ -330,6 +332,30 @@ SCENARIO(
           CHECK(it->second == 10);
         }
       }
+    }
+  }
+}
+
+SCENARIO("The hash map can be initialized by initializer lists.") {
+  WHEN("an initializer list with unique keys is used") {
+    hash_map map{{1, 5}, {-1, 2}, {8, 4}, {5, -4}, {-3, -1}};
+    THEN("every key-value-pair can is inserted.") {
+      CHECK(size(map) == 5);
+      CHECK(map.at(1) == 5);
+      CHECK(map.at(-1) == 2);
+      CHECK(map.at(8) == 4);
+      CHECK(map.at(5) == -4);
+      CHECK(map.at(-3) == -1);
+    }
+  }
+
+  WHEN("an initializer list with non-unique keys is used") {
+    hash_map map{{1, 5}, {-1, 2}, {1, 4}, {5, -4}, {5, -1}};
+    THEN("the mapped value of non-unique keys is one of the given values.") {
+      CHECK(size(map) == 3);
+      CHECK((map.at(1) - 5) * (map.at(1) - 4) == 0);
+      CHECK(map.at(-1) == 2);
+      CHECK((map.at(5) + 4) * (map.at(5) + 1) == 0);
     }
   }
 }

@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <functional>
+#include <initializer_list>
 #include <iterator>
 #include <stdexcept>
 #include <type_traits>
@@ -90,6 +91,15 @@ class hash_map {
   hash_map() : data(2) {
     data.reserve(3);
     data[2].empty = false;
+  }
+
+  hash_map(std::initializer_list<value_type> list) : hash_map{} {
+    reserve(list.size());
+    for (const auto& e : list) {
+      const auto index = node_index(e.first);
+      if (data[index].empty) ++load_;
+      data[index] = {e.first, e.second};
+    }
   }
 
   real_type max_load_factor() const { return max_load_factor_; }
