@@ -126,6 +126,26 @@ SCENARIO(
     "iterators.") {
   using namespace std;
 
+  static_assert(is_copy_constructible_v<hash_map::iterator>,
+                "hash_map::iterator is not copy construbtible!");
+  static_assert(is_copy_assignable_v<hash_map::iterator>,
+                "hash_map::iterator is not assignable!");
+  static_assert(is_destructible_v<hash_map::iterator>,
+                "hash_map::iterator is not destructible!");
+  static_assert(is_swappable_v<hash_map::iterator>,
+                "hash_map::iterator is not swappable!");
+  static_assert(is_same_v<iterator_traits<hash_map::iterator>::value_type,
+                          hash_map::value_type>);
+  static_assert(is_same_v<iterator_traits<hash_map::iterator>::difference_type,
+                          hash_map::difference_type>);
+  static_assert(is_same_v<iterator_traits<hash_map::iterator>::reference,
+                          hash_map::reference>);
+  static_assert(is_same_v<iterator_traits<hash_map::iterator>::pointer,
+                          hash_map::pointer>);
+  static_assert(
+      is_same_v<iterator_traits<hash_map::iterator>::iterator_category,
+                forward_iterator_tag>);
+
   GIVEN("a default constructed hash map") {
     hash_map map{};
 

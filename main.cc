@@ -32,11 +32,11 @@ int main(int argc, char** argv) {
 
   bit_reversal_hash hash{};
   std::mt19937 rng{std::random_device{}()};
-  for (int i = 0; i < 10; ++i) {
-    const auto number = rng();
-    std::cout << std::bitset<32>(number) << "\t"
-              << std::bitset<32>(hash(number)) << std::endl;
-  }
+  // for (int i = 0; i < 10; ++i) {
+  //   const auto number = rng();
+  //   std::cout << std::bitset<32>(number) << "\t"
+  //             << std::bitset<32>(hash(number)) << std::endl;
+  // }
 
   map.insert({1, 1});
   map.insert({2, 5});
@@ -45,29 +45,29 @@ int main(int argc, char** argv) {
   map.insert({3, 0});
   map.insert({12, 10});
 
-  for (int i = 0; i < map.data.size(); ++i) {
-    std::cout << i << ":\t";
-    if (!map.data[i].empty) {
-      std::cout << map.data[i].key << "\t" << map.data[i].value;
-    } else {
-      std::cout << "----";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
+  // for (int i = 0; i < map.data.size(); ++i) {
+  //   std::cout << i << ":\t";
+  //   if (!map.data[i].empty) {
+  //     std::cout << map.data[i].key << "\t" << map.data[i].value;
+  //   } else {
+  //     std::cout << "----";
+  //   }
+  //   std::cout << std::endl;
+  // }
+  // std::cout << std::endl;
 
   map.reserve(15);
 
-  for (int i = 0; i < map.data.size(); ++i) {
-    std::cout << i << ":\t";
-    if (!map.data[i].empty) {
-      std::cout << map.data[i].key << "\t" << map.data[i].value;
-    } else {
-      std::cout << "----";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
+  // for (int i = 0; i < map.data.size(); ++i) {
+  //   std::cout << i << ":\t";
+  //   if (!map.data[i].empty) {
+  //     std::cout << map.data[i].key << "\t" << map.data[i].value;
+  //   } else {
+  //     std::cout << "----";
+  //   }
+  //   std::cout << std::endl;
+  // }
+  // std::cout << std::endl;
 
   std::cout << "map[1] = " << map[1] << std::endl;
   std::cout << "map[2] = " << map[2] << std::endl;
