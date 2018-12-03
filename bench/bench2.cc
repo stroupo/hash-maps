@@ -6,6 +6,7 @@
 #include<random>
 #include<algorithm>
 #include<iostream>
+#include <fstream>
 #include<string>
 #include<cmath>
 #include<algorithm>
@@ -23,7 +24,7 @@
 // }
 
 template<typename HashMap>
-auto mf_sequential_insertion_unique(
+auto mf_sequential_insertion(
 	HashMap &hm,
 	std::vector<typename HashMap::key_type> &keyvec)
 {
@@ -36,26 +37,34 @@ auto mf_sequential_insertion_unique(
 }
 
 template <typename Function>
-float measure(Function function)
+float measure(Function function, int repetitions = 10)
+{
+	float elapsed_total = 0;
+	for(int i=0; i<repetitions; i++)
+	{
+	    elapsed_total += time_single_execution(function);
+	}
+	return elapsed_total / repetitions;
+}
+template <typename Funtion>
+float time_single_execution(Funtion function)
 {
 	auto start = std::chrono::high_resolution_clock::now();
 	function();
     auto end = std::chrono::high_resolution_clock::now();
     auto diff = end - start;
-    const float elapsed = std::chrono::duration<float>(diff).count();
-	return elapsed;
+    return std::chrono::duration<float>(diff).count();
 }
-
 struct makeUniqueString
 {
 	makeUniqueString(
 		int length=32,
-		int count=0) : length(length), count(count), rng(rd()){}
+		int count=0) : length(length), count(count) {}
 	int length;
 	int count;
 	std::string str{"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
-	std::random_device rd;
-	std::mt19937 rng;
+	// std::random_device rd;
+	std::mt19937 rng{std::random_device{}()};
 	std::string operator()()
 	{
 		std::shuffle(str.begin(), str.end(), rng);
@@ -93,30 +102,114 @@ std::vector<T> makeVector(int size,
 	if(non_unique > 0.0f)
 	{
 		int mults = (int) std::floor(non_unique * size);
-		std::transform(
-				vec.begin(),
-				vec.begin() + mults,
-				vec.begin(),
-				[&vec, &uni, &rng](T i){return vec[uni(rng)];});
+		// std::transform(
+		// 		vec.begin(),
+		// 		vec.begin() + mults,
+		// 		vec.begin(),
+		// 		[&vec, &uni, &rng](T i){return vec[uni(rng)];});
+		std::for_each(vec.begin(), vec.end(), 
+			[&vec, &uni, &rng](T& x){x = vec[uni(rng)];});
 	}
 	std::shuffle(vec.begin(), vec.end(), rng);
 	return vec;
 
 }
+template<typename X, typename Y>
+void writeResultToFile(std::string filename,
+					   const std::vector<std::pair<X, Y>> &vec,
+					   char delimiter = '\n',
+					   char seperator = ',')
+{
+	std::ofstream outfile;
+	outfile.open(filename);
+	for(auto pair : vec)
+	{
+		outfile << pair.first << seperator << pair.second << delimiter;
+	}
+	outfile.close();
+}
+template<typename T>
+std::vector<T> range(T start, T stop, T step)
+{
+	std::vector<T> vec;
+	T i = start;
+	while((step > 0) ? (i < stop) : (i > stop))
+	{
+		vec.push_back(i);
+		i += step;
+	}
+	return vec;
+}
+template<typename KeyType>
+void sequentialInsertTests()
+{
+	std::vector<int> sizes = range<int>((int) 1E4,
+	                                    (int) 1E5,
+	                                    (int) 1E4);
+	std::vector<std::pair<int, float>> results_stl;
+	std::vector<std::pair<int, float>> results_boost;
+	for (int size : sizes)
+	{
+		std::vector<KeyType> vec = makeVector<KeyType>((int) size);
+		float elapsed = 0.0f;
+		
+		std::unordered_map<KeyType, int, std::hash<KeyType>> stl_hm;
+		elapsed = measure(mf_sequential_insertion(stl_hm, vec));
+		results_stl.push_back({size, elapsed});
+		std::cout << "STL: " << size << ": " << elapsed << std::endl;
+
+
+		boost::unordered_map<KeyType, int, std::hash<KeyType>> boost_hm;
+		elapsed = measure(mf_sequential_insertion(boost_hm, vec));
+		results_boost.push_back({size, elapsed});
+		std::cout << "BOOST:" << size << ": " << elapsed << std::endl;
+	}
+	writeResultToFile("seq_insert_stl.csv", results_stl);
+	writeResultToFile("seq_insert_boost.csv", results_boost);
+	std::cout << sizes.size() << std::endl;
+}
+/*
+Get Memory Footprint of all the operations
+Realistic use-case, insert, lookup, delete
+Sequential insert unique int
+Sequential insert unique string
+Sequential insert non-unique int
+Sequential insert non-unique string
+Lookup existing String
+Lookup non-existing int
+Erase existing int
+Erase non-existing String
+
+*/
 int main()
 {
 	// typedef std::string T;
 	typedef std::string T;
-	std::vector<T> vec = makeVector<T>((int) 1E4);
+	std::vector<T> vec = makeVector<T>((int) 1E3);
 	
 	std::unordered_map<T, int, std::hash<T>> stl_hm;
-	auto function = mf_sequential_insertion_unique(stl_hm, vec);
+	auto function = mf_sequential_insertion(stl_hm, vec);
 	float elapsed = measure(function);
 	std::cout << elapsed << std::endl;
 
 	boost::unordered_map<T, int, std::hash<T>> boost_hm;
-	elapsed = measure(mf_sequential_insertion_unique(boost_hm, vec));
+	elapsed = measure(mf_sequential_insertion(boost_hm, vec));
 	std::cout << elapsed << std::endl;
+
+
+	sequentialInsertTests<std::string>();
+	// for(auto sz : sz_vecs)
+	// {
+	// 	std::vector<T> vec = makeVector<T>(sz);
+
+	// 	auto function = mf_sequential_insertion(stl_hm, vec);
+	// 	float elapsed = measure(function);
+	// 	std::cout << "STL: " << elapsed << std::endl;
+
+	// 	boost::unordered_map<T, int, std::hash<T>> boost_hm;
+	// 	elapsed = measure(mf_sequential_insertion(boost_hm, vec));
+	// 	std::cout << "BST: " << elapsed << std::endl;
+	// }
 
 	// int size=10;
 	// std::vector<std::string> vec = makeVector<std::string>(size);
