@@ -23,6 +23,8 @@
 // 	clock::now();
 // }
 
+typedef double Time;
+
 template<typename HashMap>
 auto mf_sequential_insertion(
 	HashMap &hm,
@@ -102,11 +104,6 @@ std::vector<T> makeVector(int size,
 	if(non_unique > 0.0f)
 	{
 		int mults = (int) std::floor(non_unique * size);
-		// std::transform(
-		// 		vec.begin(),
-		// 		vec.begin() + mults,
-		// 		vec.begin(),
-		// 		[&vec, &uni, &rng](T i){return vec[uni(rng)];});
 		std::for_each(vec.begin(), vec.end(), 
 			[&vec, &uni, &rng](T& x){x = vec[uni(rng)];});
 	}
@@ -141,7 +138,7 @@ std::vector<T> range(T start, T stop, T step)
 	return vec;
 }
 template<typename KeyType>
-void sequentialInsertTests()
+void sequentialInsert()
 {
 	std::vector<int> sizes = range<int>((int) 1E4,
 	                                    (int) 1E5,
@@ -168,6 +165,23 @@ void sequentialInsertTests()
 	writeResultToFile("seq_insert_boost.csv", results_boost);
 	std::cout << sizes.size() << std::endl;
 }
+// Implement << for pairs: this is needed to print out mappings where range
+// iteration goes over (key, value) pairs.
+template <typename T, typename U>
+std::ostream& operator<<(std::ostream& out, const std::pair<T, U>& p) {
+  out << "[" << p.first << ", " << p.second << "]";
+  return out;
+}
+
+template<typename T, class... HashMaps>
+void seqInsert(int size, HashMaps... hms)
+{
+	std::vector<T> vec = makeVector<T>(size);
+	std::vector<float> measures = {measure(mf_sequential_insertion(hms, vec))...};
+	for(auto m : measures) std::cout << m << std::endl;
+	std::cout << "can call \n" << std::endl;
+}
+
 /*
 Get Memory Footprint of all the operations
 Realistic use-case, insert, lookup, delete
@@ -183,21 +197,26 @@ Erase non-existing String
 */
 int main()
 {
-	// typedef std::string T;
 	typedef std::string T;
 	std::vector<T> vec = makeVector<T>((int) 1E3);
 	
 	std::unordered_map<T, int, std::hash<T>> stl_hm;
 	auto function = mf_sequential_insertion(stl_hm, vec);
-	float elapsed = measure(function);
-	std::cout << elapsed << std::endl;
+	// float elapsed = measure(function);
+	// std::cout << elapsed << std::endl;
 
 	boost::unordered_map<T, int, std::hash<T>> boost_hm;
-	elapsed = measure(mf_sequential_insertion(boost_hm, vec));
-	std::cout << elapsed << std::endl;
+	// elapsed = measure(mf_sequential_insertion(boost_hm, vec));
+	// std::cout << elapsed << std::endl;
 
 
-	sequentialInsertTests<std::string>();
+	boost_hm.insert({"bla", 1});
+	stl_hm.insert({"bla", 1});
+
+	seqInsert<T>(100, boost_hm, stl_hm);
+	// seqInsert(boost_hm);
+	// print_container(boost_hm, stl_hm);
+	// sequentialInsert<std::string>();
 	// for(auto sz : sz_vecs)
 	// {
 	// 	std::vector<T> vec = makeVector<T>(sz);
