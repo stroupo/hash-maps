@@ -6,11 +6,13 @@
 #include<random>
 #include<algorithm>
 #include<iostream>
-#include <fstream>
+#include<fstream>
 #include<string>
 #include<cmath>
 #include<algorithm>
-
+#include<utility>
+#include<cstdlib>
+#include<experimental/filesystem>
 // boost_hm::erase
 // stl_hm::erase
 // google_gm::delete
@@ -24,6 +26,19 @@
 // }
 
 typedef double Time;
+typedef std::string KeyType;
+typedef std::vector<Time> Timings;
+typedef std::vector<std::pair<int, std::vector<Time>>> TimingResults;
+std::string img_path = "/home/matthias/projects/hash-maps/bench/build";
+
+struct Range
+{
+	Range(int start, int stop, int step): start(start), stop(stop), step(step){};
+	Range(int stop): start(0), stop(stop), step(1){};
+	int start;
+	int stop;
+	int step;
+};
 
 template<typename HashMap>
 auto mf_sequential_insertion(
@@ -39,23 +54,13 @@ auto mf_sequential_insertion(
 }
 
 template <typename Function>
-float measure(Function function, int repetitions = 10)
-{
-	float elapsed_total = 0;
-	for(int i=0; i<repetitions; i++)
-	{
-	    elapsed_total += time_single_execution(function);
-	}
-	return elapsed_total / repetitions;
-}
-template <typename Funtion>
-float time_single_execution(Funtion function)
+Time measure(Function function, int repetitions = 1)
 {
 	auto start = std::chrono::high_resolution_clock::now();
 	function();
     auto end = std::chrono::high_resolution_clock::now();
     auto diff = end - start;
-    return std::chrono::duration<float>(diff).count();
+    return std::chrono::duration<Time>(diff).count();
 }
 struct makeUniqueString
 {
@@ -137,49 +142,76 @@ std::vector<T> range(T start, T stop, T step)
 	}
 	return vec;
 }
-template<typename KeyType>
-void sequentialInsert()
-{
-	std::vector<int> sizes = range<int>((int) 1E4,
-	                                    (int) 1E5,
-	                                    (int) 1E4);
-	std::vector<std::pair<int, float>> results_stl;
-	std::vector<std::pair<int, float>> results_boost;
-	for (int size : sizes)
-	{
-		std::vector<KeyType> vec = makeVector<KeyType>((int) size);
-		float elapsed = 0.0f;
-		
-		std::unordered_map<KeyType, int, std::hash<KeyType>> stl_hm;
-		elapsed = measure(mf_sequential_insertion(stl_hm, vec));
-		results_stl.push_back({size, elapsed});
-		std::cout << "STL: " << size << ": " << elapsed << std::endl;
-
-
-		boost::unordered_map<KeyType, int, std::hash<KeyType>> boost_hm;
-		elapsed = measure(mf_sequential_insertion(boost_hm, vec));
-		results_boost.push_back({size, elapsed});
-		std::cout << "BOOST:" << size << ": " << elapsed << std::endl;
-	}
-	writeResultToFile("seq_insert_stl.csv", results_stl);
-	writeResultToFile("seq_insert_boost.csv", results_boost);
-	std::cout << sizes.size() << std::endl;
-}
-// Implement << for pairs: this is needed to print out mappings where range
-// iteration goes over (key, value) pairs.
-template <typename T, typename U>
-std::ostream& operator<<(std::ostream& out, const std::pair<T, U>& p) {
-  out << "[" << p.first << ", " << p.second << "]";
-  return out;
-}
 
 template<typename T, class... HashMaps>
-void seqInsert(int size, HashMaps... hms)
+Timings seqInsert(int size, float non_unique, HashMaps... hms)
 {
-	std::vector<T> vec = makeVector<T>(size);
-	std::vector<float> measures = {measure(mf_sequential_insertion(hms, vec))...};
-	for(auto m : measures) std::cout << m << std::endl;
-	std::cout << "can call \n" << std::endl;
+	std::vector<T> vec = makeVector<T>(size, non_unique);
+	return {measure(mf_sequential_insertion(hms, vec))...};
+}
+template<typename KeyType>
+TimingResults sequentialInsert(int start, int stop, int step, float unique)
+{
+	std::vector<int> sizes = range<int>(start, stop, step);
+	TimingResults timing_results;
+	for(int size : sizes)
+	{
+		// std::unordered_map<KeyType, int, std::hash<KeyType>> stl_hm;
+		std::unordered_map<KeyType, int> stl_hm;
+		// boost::unordered_map<KeyType, int, std::hash<KeyType>> boost_hm;
+		boost::unordered_map<KeyType, int> boost_hm;
+		std::vector<Time> timings = seqInsert<KeyType>(size, unique, boost_hm, stl_hm);
+		timing_results.push_back({size, timings});
+	}
+	return timing_results;
+}
+
+std::string trToPylist(TimingResults &trs)
+{
+	std::string str = "[";
+	for(auto tr: trs)
+	{
+		str.append("[");
+		str.append(std::to_string(tr.first));
+		for(auto r : tr.second)
+		{
+			str.append(",");
+			str.append(std::to_string(r));
+		}
+		str.append("],\n");
+	}
+	str.append("]");
+	return str;
+}
+std::string trToPython(TimingResults &trs,
+				std::string title,
+				std::string filename,
+				std::vector<std::string> names,
+				std::string xlabel="input size",
+				std::string ylabel="time / ms")
+{
+	std::string code;
+	code.append("import matplotlib.pyplot as plt\n");
+	code.append("xys=" + trToPylist(trs) + "\n");
+	code.append("title='" + title +"'\n");
+	code.append("filename='" + filename + "'\n");
+	code.append("names=[");
+	for(auto name : names) code.append("'" + name + "'," );
+	code.append("]\n");
+	code.append("xlabel='"+xlabel+"'\n");
+	code.append("ylabel='"+ylabel+"'\n");
+	code.append("xys = list(map(list, zip(*xys)))\n");
+	code.append("xs = xys[0]\n");
+	code.append("for ys, name in zip(xys[1:], names):\n");
+	code.append("\tplt.plot(xs, ys, label=name)\n");
+	code.append("plt.xlabel(xlabel)\n");
+	code.append("plt.ylabel(ylabel)\n");
+	code.append("plt.title(title)\n");
+	code.append("plt.legend()\n");
+	code.append("plt.savefig(filename)\n");
+	code = "\"" + code + "\""; 
+	// return "\"print('Hello World!')\"";
+	return code;
 }
 
 /*
@@ -195,45 +227,45 @@ Erase existing int
 Erase non-existing String
 
 */
+template<typename KeyType>
+void benchSequentialInsertions(int start, int stop, int step, std::string keytype, float unique = 0.0f)
+{
+	// {
+	TimingResults trs = sequentialInsert<KeyType>(start, stop, step, unique);
+	makeUniqueString mus;
+	std::string code = trToPython(
+		trs,
+		"Sequential Inserts - Unique: "+ std::to_string(unique)  +"  - " + keytype,
+		img_path + mus(),
+		{"STL", "BOOST"});
+	std::system(("python -c " + code).c_str());
+	// }
+	// {
+	// TimingResults trs = sequentialInsert<KeyType>(start, stop, step, 0.2f);
+	// std::string code = trToPython(
+	// 	trs,
+	// 	"Sequential Inserts - Non-Unique - " + keytype,
+	// 	img_path + "si_nu_20_" + keytype,
+	// 	{"STL", "BOOST"});
+	// std::system(("python -c " + code).c_str());
+	// }
+	// {
+	// TimingResults trs = sequentialInsert<KeyType>(start, stop, step, 0.5f);
+	// std::string code = trToPython(
+	// 	trs,
+	// 	"Sequential Inserts - Non-Unique - 50 - " + keytype,
+	// 	img_path + "si_nu_50_" + keytype,
+	// 	{"STL", "BOOST"});
+	// std::system(("python -c " + code).c_str());
+	// }
+}
 int main()
 {
-	typedef std::string T;
-	std::vector<T> vec = makeVector<T>((int) 1E3);
-	
-	std::unordered_map<T, int, std::hash<T>> stl_hm;
-	auto function = mf_sequential_insertion(stl_hm, vec);
-	// float elapsed = measure(function);
-	// std::cout << elapsed << std::endl;
-
-	boost::unordered_map<T, int, std::hash<T>> boost_hm;
-	// elapsed = measure(mf_sequential_insertion(boost_hm, vec));
-	// std::cout << elapsed << std::endl;
-
-
-	boost_hm.insert({"bla", 1});
-	stl_hm.insert({"bla", 1});
-
-	seqInsert<T>(100, boost_hm, stl_hm);
-	// seqInsert(boost_hm);
-	// print_container(boost_hm, stl_hm);
-	// sequentialInsert<std::string>();
-	// for(auto sz : sz_vecs)
-	// {
-	// 	std::vector<T> vec = makeVector<T>(sz);
-
-	// 	auto function = mf_sequential_insertion(stl_hm, vec);
-	// 	float elapsed = measure(function);
-	// 	std::cout << "STL: " << elapsed << std::endl;
-
-	// 	boost::unordered_map<T, int, std::hash<T>> boost_hm;
-	// 	elapsed = measure(mf_sequential_insertion(boost_hm, vec));
-	// 	std::cout << "BST: " << elapsed << std::endl;
-	// }
-
-	// int size=10;
-	// std::vector<std::string> vec = makeVector<std::string>(size);
-	// for(int i=0; i<size; i++)
-	// {
-	// 	std::cout << vec[i] << std::endl;
-	// }
+	int start = (int) 1e4;
+	int stop = (int) 1e5;
+	int step = (int) 1e4;
+	benchSequentialInsertions<std::string>(start, stop, step, "str", 0.0f);
+	benchSequentialInsertions<std::string>(start, stop, step, "str", 0.5f);
+	benchSequentialInsertions<int>(start, stop, step, "int", 0.0f);
+	benchSequentialInsertions<int>(start, stop, step, "int", 0.5f);
 }
