@@ -1,11 +1,38 @@
 cmake_minimum_required(VERSION 3.11)
-project(hash_map VERSION 0.1.0 LANGUAGES CXX)
 
-add_library(hash_map INTERFACE)
-target_include_directories(hash_map INTERFACE .)
-target_compile_features(hash_map INTERFACE cxx_std_17)
+project(hash_map
+  VERSION 0.1.0
+  LANGUAGES CXX
+  DESCRIPTION
+    "A stroupo library with different implementations for hash maps."
+)
+set(PROJECT_NAMESPACE "stroupo")
 
-add_library(stroupo::hash_map ALIAS hash_map)
+# Configuration
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
 
-enable_testing()
-add_subdirectory(tests)
+# Building
+add_library(${PROJECT_NAME}
+  INTERFACE
+)
+target_include_directories(${PROJECT_NAME}
+  INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+)
+target_compile_features(${PROJECT_NAME}
+  INTERFACE
+    cxx_std_17
+)
+add_library(${PROJECT_NAMESPACE}::${PROJECT_NAME}
+  ALIAS
+    ${PROJECT_NAME}
+)
+
+# Deploying
+include(${PROJECT_NAME}Install)
+include(${PROJECT_NAME}PkgconfigInstall)
+include(${PROJECT_NAME}Uninstall)
+include(${PROJECT_NAME}Export)
