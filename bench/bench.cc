@@ -13,7 +13,8 @@
 #include<algorithm>
 #include<utility>
 #include<cstdlib>
-#include<hash_map.h>
+// #include<hash_map.h>
+#include <hash_map/hash_map.h>
 // boost_hm::erase
 // stl_hm::erase
 // google_gm::delete
@@ -30,7 +31,9 @@ typedef double Time;
 typedef std::string KeyType;
 typedef std::vector<Time> Timings;
 typedef std::vector<std::pair<int, std::vector<Time>>> TimingResults;
-std::string img_path = boost::filesystem::path full_path(boost::filesystem::current_path());
+// std::string img_path = full_path(boost::filesystem::current_path());
+boost::filesystem::path full_path( boost::filesystem::current_path() );
+std::string img_path = full_path.string();
 
 struct Range
 {
@@ -369,9 +372,67 @@ void no_overhead_lookups()
     	// std::cout << size << "\t" << boost_time << "\t" << stl_time << "\n";
 	}
 }
+template<typename KeyType>
+void no_overhead_erase()
+{
+	Range r{200'000, 1'000'000, 200'000};
+	std::vector<int> sizes = range<int>(r);
+	for(int size : sizes)
+	{
+		stroupo::hash_map<KeyType, int> stroupo_hm;
+		std::unordered_map<KeyType, int> stl_hm;
+		boost::unordered_map<KeyType, int> boost_hm;
+
+		std::vector<KeyType> vec = makeVector<KeyType>(size,
+													   0.0f);
+		int n_erase{1000};
+		std::vector<KeyType> erases(n_erase);
+		std::copy(vec.end() - n_erase,
+				  vec.end(),
+				  erases.begin());
+		vec.erase(vec.end() - n_erase,
+				  vec.end());
+
+		for(KeyType k : vec)
+		{
+			boost_hm.insert({k, 0});
+			stl_hm.insert({k, 0});
+			stroupo_hm.insert({k, 0});
+		}
+		auto start = std::chrono::high_resolution_clock::now();
+		for(KeyType k : erases)
+		{
+			boost_hm.erase(k);
+		}
+    	auto end = std::chrono::high_resolution_clock::now();
+    	auto diff = end - start;
+    	Time boost_time = std::chrono::duration<Time>(diff).count();
+
+    	start = std::chrono::high_resolution_clock::now();
+    	for(KeyType k : erases)
+    	{
+			stl_hm.erase(k);
+    	}
+    	end = std::chrono::high_resolution_clock::now();
+    	diff = end - start;
+    	Time stl_time = std::chrono::duration<Time>(diff).count();
+
+    	start = std::chrono::high_resolution_clock::now();
+		for(KeyType k : erases)
+		{
+			stroupo_hm.erase(k);
+		}
+    	end = std::chrono::high_resolution_clock::now();
+    	diff = end - start;
+    	Time stroupo_time = std::chrono::duration<Time>(diff).count();
+    	std::cout << size << "\t" << boost_time << "\t" << stl_time << "\t" << stroupo_time << "\n";
+    	// std::cout << size << "\t" << boost_time << "\t" << stl_time << "\n";
+	}
+}
 int main()
 {
 	// no_overhead_lookups<std::string>();
+	no_overhead_erase<std::string>();
 	// Range r{(int) 1e5, (int) 1e7, (int) 1e5};
 	// Range r{100'000, 2'000'000, 100'000};
 	// benchSequentialInsertions<std::string>(r, "str", 0.0f);
@@ -395,5 +456,4 @@ int main()
 	// std::cout << "\n";
 	// a.erase(a.end() - 3, a.end());
 	// for(auto i: a) std::cout << i << " ";
-
 }

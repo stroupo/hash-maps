@@ -66,6 +66,7 @@ class hash_map {
   template <typename Key_iterator, typename T_iterator>
   void insert(Key_iterator keys_first, Key_iterator keys_last,
               T_iterator first);
+  auto erase(const key_type& key);
 
   // Lookup
   mapped_type& operator[](const key_type& key);
@@ -336,6 +337,17 @@ auto hash_map<Key, T, Hash, Key_equal, Allocator>::find(const key_type& key)
 
 template <typename Key, typename T, typename Hash, typename Key_equal,
           typename Allocator>
+auto hash_map<Key, T, Hash, Key_equal, Allocator>::erase(const key_type& key)
+{
+  const auto index = node_index(key);
+  if (table_[index].empty) return 0;
+  table_.erase(table_.begin() + index);
+  return 1;
+}
+
+template <typename Key, typename T, typename Hash, typename Key_equal,
+          typename Allocator>
+
 auto hash_map<Key, T, Hash, Key_equal, Allocator>::find(
     const key_type& key) const -> const_iterator {
   const auto index = node_index(key);
