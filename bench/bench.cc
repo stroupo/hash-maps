@@ -1,5 +1,6 @@
 #include<unordered_map>
 #include<boost/unordered_map.hpp>
+#include<boost/filesystem.hpp>
 #include<memory>
 #include<vector>
 #include<chrono>
@@ -29,7 +30,7 @@ typedef double Time;
 typedef std::string KeyType;
 typedef std::vector<Time> Timings;
 typedef std::vector<std::pair<int, std::vector<Time>>> TimingResults;
-std::string img_path = "/home/matthias/projects/img";
+std::string img_path = boost::filesystem::path full_path(boost::filesystem::current_path());
 
 struct Range
 {
@@ -370,7 +371,7 @@ void no_overhead_lookups()
 }
 int main()
 {
-	no_overhead_lookups<std::string>();
+	// no_overhead_lookups<std::string>();
 	// Range r{(int) 1e5, (int) 1e7, (int) 1e5};
 	// Range r{100'000, 2'000'000, 100'000};
 	// benchSequentialInsertions<std::string>(r, "str", 0.0f);
@@ -394,6 +395,5 @@ int main()
 	// std::cout << "\n";
 	// a.erase(a.end() - 3, a.end());
 	// for(auto i: a) std::cout << i << " ";
-
 
 }
