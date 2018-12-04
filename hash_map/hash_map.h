@@ -46,6 +46,11 @@ class hash_map {
       index = (index + 1) % data.size();
     return index;
   }
+  auto find(const key_type& key)
+  {
+    const auto index = node_index(key);
+    return (data[index].empty) ? data.end() : data.begin() + index;
+  }
 
   mapped_type& operator[](const key_type& key) {
     const auto index = node_index(key);
