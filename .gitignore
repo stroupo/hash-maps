@@ -8,6 +8,7 @@
 !*.h
 
 !CMakeLists.txt
+!meson.build
 !README.md
 
 !.gitignore
