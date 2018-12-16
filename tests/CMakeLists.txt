@@ -9,6 +9,7 @@ endif()
 add_executable(main_test
   doctest_main.cc
   hash_map.cc
+  ranges.cc
 )
 
 target_link_libraries(main_test
@@ -20,3 +21,7 @@ target_link_libraries(main_test
 add_test(hash_map_test
   main_test
 )
+
+# add_test(ranges_test
+#   main_test
+# )
