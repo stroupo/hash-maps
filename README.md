@@ -82,20 +82,7 @@ As long as this build directory exists the commands written above can be used to
 - Benchmark everything!
 
 ## Resources
-### Hashtables
 - https://probablydance.com/2014/05/03/i-wrote-a-fast-hash-table/
 - http://bannalia.blogspot.com/2014/01/a-better-hash-table-clang.html
 - https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
 - https://stackoverflow.com/questions/34563574/how-to-build-hash-function-for-various-template-types
-
-### CMake
-- Daniel Pfeifer: *Effective CMake* [2017]
-    - https://www.youtube.com/watch?v=bsXLMQ6WgIk
-    - https://de.slideshare.net/DanielPfeifer1/effective-cmake
-
-### doctest
-- https://github.com/onqtam/doctest
-
-
-### packaging
-- https://conan.io/

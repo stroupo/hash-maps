@@ -1,3 +1,13 @@
+/*
+TODO:
+    - add persistency
+    - include load factor
+    - Move up directory
+    - get memory footprint of all the operations
+    - add realistic use-cases
+    - add erase existing int
+*/
+
 #include<unordered_map>
 #include<boost/unordered_map.hpp>
 #include<boost/filesystem.hpp>
@@ -13,25 +23,13 @@
 #include<algorithm>
 #include<utility>
 #include<cstdlib>
-// #include<hash_map.h>
 #include <hash_map/hash_map.h>
-// boost_hm::erase
-// stl_hm::erase
-// google_gm::delete
 
-// template <typename HashMap>
-// void measure_erase(HashMap& map, ...){
-// 	clock::now();
-// 	map.erase(random);
-// 	hash_map_traits<HashMap>::erase(map,...);
-// 	clock::now();
-// }
 
 typedef double Time;
 typedef std::string KeyType;
 typedef std::vector<Time> Timings;
 typedef std::vector<std::pair<int, std::vector<Time>>> TimingResults;
-// std::string img_path = full_path(boost::filesystem::current_path());
 boost::filesystem::path full_path( boost::filesystem::current_path() );
 std::string img_path = full_path.string();
 
@@ -56,6 +54,18 @@ auto mf_sequential_insertion(
 		}
 	};
 }
+template<typename HashMap>
+auto mf_sequential_lookups(
+	HashMap &hm,
+	std::vector<typename HashMap::key_type> &keyvec)
+{
+	return [&hm, &keyvec](){
+		for(auto key : keyvec)
+		{
+			hm.find(key);
+		}
+	};
+}
 
 template <typename Function>
 Time measure(Function function, int repetitions = 1)
@@ -66,9 +76,9 @@ Time measure(Function function, int repetitions = 1)
     auto diff = end - start;
     return std::chrono::duration<Time>(diff).count();
 }
-struct makeUniqueString
+struct MakeUniqueString
 {
-	makeUniqueString(
+	MakeUniqueString(
 		int length=32,
 		int count=0) : length(length), count(count) {}
 	int length;
@@ -83,28 +93,28 @@ struct makeUniqueString
 	}
 };
 template<typename T>
-std::vector<T> makeUniqueVector(int size);
+std::vector<T> make_unique_vector(int size);
 
 template<>
-std::vector<int> makeUniqueVector<int>(int size)
+std::vector<int> make_unique_vector<int>(int size)
 {
 	std::vector<int> vec(size);
 	std::iota(vec.begin(), vec.end(), 0);
 	return vec;
 }
 template<>
-std::vector<std::string> makeUniqueVector<std::string>(int size)
+std::vector<std::string> make_unique_vector<std::string>(int size)
 {
 	std::vector<std::string> vec(size);
-	makeUniqueString mus;
+	MakeUniqueString mus;
 	std::generate(vec.begin(), vec.end(), [&](){ return mus(); });
 	return vec;
 }
 template<typename T> 
-std::vector<T> makeVector(int size,
+std::vector<T> make_vector(int size,
 	  					  float non_unique = 0.0f)
 {
-	std::vector<T> vec = makeUniqueVector<T>(size);
+	std::vector<T> vec = make_unique_vector<T>(size);
 
 	std::random_device rd;
 	std::mt19937 rng(rd());
@@ -124,20 +134,6 @@ std::vector<T> makeVector(int size,
 	std::shuffle(vec.begin(), vec.end(), rng);
 	return vec;
 
-}
-template<typename X, typename Y>
-void writeResultToFile(std::string filename,
-					   const std::vector<std::pair<X, Y>> &vec,
-					   char delimiter = '\n',
-					   char seperator = ',')
-{
-	std::ofstream outfile;
-	outfile.open(filename);
-	for(auto pair : vec)
-	{
-		outfile << pair.first << seperator << pair.second << delimiter;
-	}
-	outfile.close();
 }
 template<typename T>
 std::vector<T> range(T start, T stop, T step)
@@ -165,16 +161,22 @@ std::vector<T> range(Range &r)
 }
 
 template<typename T, class... HashMaps>
-Timings seqInsert(int size, float non_unique, HashMaps... hms)
+Timings time_sequential_insert_h(int size, float non_unique, HashMaps... hms)
 {
-	std::vector<T> vec = makeVector<T>(size, non_unique);
+	std::vector<T> vec = make_vector<T>(size, non_unique);
 	Timings tms{measure(mf_sequential_insertion(hms, vec))...};
 	return tms;
 }
+template<typename T, class... HashMaps>
+Timings time_sequential_lookups_h(int size, float non_unique, std::vector<T> &vec, HashMaps... hms)
+{
+	Timings tms{measure(mf_sequential_lookups(hms, vec))...};
+	return tms;
+}
 template<typename KeyType>
-TimingResults sequentialInsert(Range &r,
-							   float unique,
-						       bool verbose=true)
+TimingResults time_sequential_insert(Range &r,
+							         float unique,
+						             bool verbose=true)
 {
 	std::vector<int> sizes = range<int>(r);
 	TimingResults timing_results;
@@ -185,10 +187,41 @@ TimingResults sequentialInsert(Range &r,
 		std::unordered_map<KeyType, int> stl_hm;
 		boost::unordered_map<KeyType, int> boost_hm;
 		// boost::unordered_map<KeyType, int, std::hash<KeyType>> boost_hm;
-		Timings timings = seqInsert<KeyType>(size, unique,
-											 boost_hm,
-											 stl_hm,
-											 stroupo_hm);
+		Timings timings = time_sequential_insert_h<KeyType>(size, unique,
+											                boost_hm,
+											 				stl_hm,
+											 				stroupo_hm
+											 				);
+		if(verbose)
+		{
+			std::cout << size;
+			for(auto t : timings) std::cout << "\t" << t;
+			std::cout << "\n";
+		}
+		timing_results.push_back({size, timings});
+	}
+	return timing_results;
+}
+template<typename KeyType>
+TimingResults time_sequential_lookups(Range &r,
+						   float unique,
+						   bool verbose=true)
+{
+	std::vector<int> sizes = range<int>(r);
+	TimingResults timing_results;
+	for(int size : sizes)
+	{
+		std::vector<KeyType> keys = make_vector<KeyType>(size, unique);
+		std::unordered_map<KeyType, int> stl_hm;
+		boost::unordered_map<KeyType, int> boost_hm;
+		for(const KeyType &k : keys)
+		{
+			boost_hm.insert({k, 0});
+			stl_hm.insert({k, 0});
+		}
+		Timings timings = time_sequential_lookups_h<KeyType>(size, unique, keys,
+											 	             boost_hm,
+											 	             stl_hm);
 		if(verbose)
 		{
 			std::cout << size;
@@ -200,7 +233,7 @@ TimingResults sequentialInsert(Range &r,
 	return timing_results;
 }
 
-std::string trToPylist(TimingResults &trs)
+std::string toPylist(TimingResults &trs)
 {
 	std::string str = "[";
 	for(auto tr: trs)
@@ -226,7 +259,7 @@ std::string trToPython(TimingResults &trs,
 {
 	std::string code;
 	code.append("import matplotlib.pyplot as plt\n");
-	code.append("xys=" + trToPylist(trs) + "\n");
+	code.append("xys=" + toPylist(trs) + "\n");
 	code.append("title='" + title +"'\n");
 	code.append("filename='" + filename + "'\n");
 	code.append("names=[");
@@ -244,216 +277,43 @@ std::string trToPython(TimingResults &trs,
 	code.append("plt.legend()\n");
 	code.append("plt.savefig(filename)\n");
 	code = "\"" + code + "\""; 
-	// return "\"print('Hello World!')\"";
 	return code;
 }
 
-/*
-Get Memory Footprint of all the operations
-Realistic use-case, insert, lookup, delete
-Lookup existing String
-Lookup non-existing int
-Erase existing int
-Erase non-existing String
-
-*/
 template<typename KeyType>
-void benchSequentialInsertions(Range &r, std::string keytype, float unique = 0.0f)
+void benchmark_all_sequential_insertions(Range &r, std::string keytype, float unique, std::string filename)
 {
-	TimingResults trs = sequentialInsert<KeyType>(r, unique);
-	makeUniqueString mus;
+	TimingResults trs = time_sequential_insert<KeyType>(r, unique);
+	MakeUniqueString mus;
 	std::string code = trToPython(
 		trs,
 		"Sequential Inserts - Unique: "+ std::to_string(unique)  +"  - " + keytype,
-		img_path + mus(),
+		img_path +  "/"+ filename,
+		{"BOOST", "STL", "STROUPO"});
+	std::system(("python -c " + code).c_str());
+}
+template<typename KeyType>
+void benchmark_all_sequential_lookups(Range &r, std::string keytype, float unique, std::string filename)
+{
+	TimingResults trs = time_sequential_lookups<KeyType>(r, unique);
+	MakeUniqueString mus;
+	std::string code = trToPython(
+		trs,
+		"Sequential Lookups - Unique: "+ std::to_string(unique)  +"  - " + keytype,
+		img_path +  "/"+ filename,
 		{"BOOST", "STL", "STROUPO"});
 	std::system(("python -c " + code).c_str());
 }
 
-template<typename KeyType>
-void no_overhead_si()
-{
-	Range r{100'000, 2'500'000, 100'000};
-	std::vector<int> sizes = range<int>(r);
-	for(int size : sizes)
-	{
-		stroupo::hash_map<KeyType, int> stroupo_hm;
-		std::unordered_map<KeyType, int> stl_hm;
-		boost::unordered_map<KeyType, int> boost_hm;
-
-		std::vector<KeyType> vec = makeVector<KeyType>(size,
-													   0.0f);
-
-		auto start = std::chrono::high_resolution_clock::now();
-		for(KeyType k : vec)
-		{
-			boost_hm.insert({k, 0});
-		}
-    	auto end = std::chrono::high_resolution_clock::now();
-    	auto diff = end - start;
-    	Time boost_time = std::chrono::duration<Time>(diff).count();
-
-    	start = std::chrono::high_resolution_clock::now();
-		for(KeyType k : vec)
-		{
-			stl_hm.insert({k, 0});
-		}
-    	end = std::chrono::high_resolution_clock::now();
-    	diff = end - start;
-    	Time stl_time = std::chrono::duration<Time>(diff).count();
-
-    	start = std::chrono::high_resolution_clock::now();
-		for(KeyType k : vec)
-		{
-			stroupo_hm.insert({k, 0});
-		}
-    	end = std::chrono::high_resolution_clock::now();
-    	diff = end - start;
-    	Time stroupo_time = std::chrono::duration<Time>(diff).count();
-    	std::cout << size << "\t" << boost_time << "\t" << stl_time << "\t" << stroupo_time << "\n";
-	}
-}
-template<typename KeyType>
-void no_overhead_lookups()
-{
-	Range r{200'000, 1'000'000, 200'000};
-	std::vector<int> sizes = range<int>(r);
-	for(int size : sizes)
-	{
-		stroupo::hash_map<KeyType, int> stroupo_hm;
-		std::unordered_map<KeyType, int> stl_hm;
-		boost::unordered_map<KeyType, int> boost_hm;
-
-		std::vector<KeyType> vec = makeVector<KeyType>(size,
-													   0.0f);
-		int n_missing{1000};
-		int n_contained{1000};
-		int n_total{n_missing + n_contained};
-		std::vector<KeyType> lookups(n_total);
-		std::copy(vec.end() - n_total,
-				  vec.end(),
-				  lookups.begin());
-		vec.erase(vec.end() - n_missing,
-				  vec.end());
-
-		for(KeyType k : vec)
-		{
-			boost_hm.insert({k, 0});
-			stl_hm.insert({k, 0});
-			stroupo_hm.insert({k, 0});
-		}
-		auto start = std::chrono::high_resolution_clock::now();
-		for(KeyType k : lookups)
-		{
-			boost_hm.find(k);
-		}
-    	auto end = std::chrono::high_resolution_clock::now();
-    	auto diff = end - start;
-    	Time boost_time = std::chrono::duration<Time>(diff).count();
-
-    	start = std::chrono::high_resolution_clock::now();
-    	for(KeyType k : lookups)
-    	{
-			stl_hm.find(k);
-    	}
-    	end = std::chrono::high_resolution_clock::now();
-    	diff = end - start;
-    	Time stl_time = std::chrono::duration<Time>(diff).count();
-
-    	start = std::chrono::high_resolution_clock::now();
-		for(KeyType k : lookups)
-		{
-			stroupo_hm.find(k);
-		}
-    	end = std::chrono::high_resolution_clock::now();
-    	diff = end - start;
-    	Time stroupo_time = std::chrono::duration<Time>(diff).count();
-    	std::cout << size << "\t" << boost_time << "\t" << stl_time << "\t" << stroupo_time << "\n";
-    	// std::cout << size << "\t" << boost_time << "\t" << stl_time << "\n";
-	}
-}
-template<typename KeyType>
-void no_overhead_erase()
-{
-	Range r{200'000, 1'000'000, 200'000};
-	std::vector<int> sizes = range<int>(r);
-	for(int size : sizes)
-	{
-		stroupo::hash_map<KeyType, int> stroupo_hm;
-		std::unordered_map<KeyType, int> stl_hm;
-		boost::unordered_map<KeyType, int> boost_hm;
-
-		std::vector<KeyType> vec = makeVector<KeyType>(size,
-													   0.0f);
-		int n_erase{1000};
-		std::vector<KeyType> erases(n_erase);
-		std::copy(vec.end() - n_erase,
-				  vec.end(),
-				  erases.begin());
-		vec.erase(vec.end() - n_erase,
-				  vec.end());
-
-		for(KeyType k : vec)
-		{
-			boost_hm.insert({k, 0});
-			stl_hm.insert({k, 0});
-			stroupo_hm.insert({k, 0});
-		}
-		auto start = std::chrono::high_resolution_clock::now();
-		for(KeyType k : erases)
-		{
-			boost_hm.erase(k);
-		}
-    	auto end = std::chrono::high_resolution_clock::now();
-    	auto diff = end - start;
-    	Time boost_time = std::chrono::duration<Time>(diff).count();
-
-    	start = std::chrono::high_resolution_clock::now();
-    	for(KeyType k : erases)
-    	{
-			stl_hm.erase(k);
-    	}
-    	end = std::chrono::high_resolution_clock::now();
-    	diff = end - start;
-    	Time stl_time = std::chrono::duration<Time>(diff).count();
-
-    	start = std::chrono::high_resolution_clock::now();
-		for(KeyType k : erases)
-		{
-			stroupo_hm.erase(k);
-		}
-    	end = std::chrono::high_resolution_clock::now();
-    	diff = end - start;
-    	Time stroupo_time = std::chrono::duration<Time>(diff).count();
-    	std::cout << size << "\t" << boost_time << "\t" << stl_time << "\t" << stroupo_time << "\n";
-    	// std::cout << size << "\t" << boost_time << "\t" << stl_time << "\n";
-	}
-}
 int main()
 {
-	// no_overhead_lookups<std::string>();
-	no_overhead_erase<std::string>();
-	// Range r{(int) 1e5, (int) 1e7, (int) 1e5};
-	// Range r{100'000, 2'000'000, 100'000};
-	// benchSequentialInsertions<std::string>(r, "str", 0.0f);
-	// std::cout << "D\n";
-	// benchSequentialInsertions<std::string>(r, "str", 0.3f);
-	// std::cout << "D\n";
-	// Range r2{100'000, 1'300'000, 100'000};
-	// benchSequentialInsertions<int>(r2, "int", 0.0f);
-	// std::cout << "D\n";
-	// benchSequentialInsertions<int>(r2, "int", 0.03f);
-	// std::vector<int> v =  makeVector<int>(10, 0.2);
-	// for(int i: v)std::cout << i << std::endl;
-	// std::vector<int> a{1,2,3,4,5};
-	// for(auto i: a) std::cout << i << " ";
-	// std::vector<int> b(3);
-	// std::cout << "\n";
-	// std::copy(a.end() - 3,
-	// 		  a.end(),
-	// 		  b.begin());
-	// for(auto i: b) std::cout << i << " ";
-	// std::cout << "\n";
-	// a.erase(a.end() - 3, a.end());
-	// for(auto i: a) std::cout << i << " ";
+	Range r{60'000, 200'000, 20'000};
+	benchmark_all_sequential_insertions<std::string>(r, "str", 0.0f, "inserts-unique-str");
+	benchmark_all_sequential_insertions<std::string>(r, "str", 0.5f, "inserts-non-unique-str");
+	benchmark_all_sequential_insertions<int>(r, "int", 0.0f, "inserts-unique-int");
+	benchmark_all_sequential_insertions<int>(r, "int", 0.5f, "inserts-non-unique-int");
+	benchmark_all_sequential_lookups<std::string>(r, "str", 0.0f, "lookups-unique-str");
+	benchmark_all_sequential_lookups<std::string>(r, "str", 0.5f, "lookups-non-unique-str");
+	benchmark_all_sequential_lookups<int>(r, "int", 0.0f, "lookups-unique-int");
+	benchmark_all_sequential_lookups<int>(r, "int", 0.5f, "lookups-non-unique-int");
 }

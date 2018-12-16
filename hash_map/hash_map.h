@@ -90,7 +90,7 @@ class hash_map {
 
  private:
   // Internal Member Variables
-  real_type max_load_factor_{0.7};
+  real_type max_load_factor_{0.5};
   size_type load_{0};
   container table_;
 };
