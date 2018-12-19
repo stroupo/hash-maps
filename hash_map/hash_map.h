@@ -39,28 +39,39 @@ class hash_map {
   size_type size() const { return load; }
   size_type max_size() const { return container::max_size(); }
 
-  size_type node_index(const key_type& key) const noexcept {
+  size_type max_probe_length = 0;                                         // max_probe_length in hashtable
+
+  size_type node_index(const key_type& key) {
     hasher hash{};
     size_type index = hash(key) % data.size();
-    while (!data[index].empty && key != data[index].key)
-      index = (index + 1) % data.size();
+    size_type i = 0;
+    while (key != data[index].key)
+      if (i < max_probe_length) {
+        index = (index + 1) % data.size();
+        i++;
+      } else throw std::runtime_error("This key was not inserted!");       // Runtime_error if #Iterations == max_probe_length
     return index;
   }
 
   mapped_type& operator[](const key_type& key) {
     const auto index = node_index(key);
-    if (data[index].empty)  // Stop wenn leer
+    if (data[index].empty)
       throw std::runtime_error{"This key was not inserted!"};
     return data[index].value;
   }
 
   size_type probe_length(const size_type& current_index,
-                         const key_type& key) const noexcept {
+                         const key_type& key) {
     hasher hash{};
-    if (hash(key) % data.size() <= current_index) {
-      return current_index - hash(key) % data.size();
+    size_type index_of_key = hash(key);
+    if (index_of_key % data.size() <= current_index) {
+      if (max_probe_length < current_index - index_of_key % data.size())
+        max_probe_length = data.size() - index_of_key % data.size() + current_index;     // update max_probe_length
+      return current_index - index_of_key % data.size();
     } else {
-      return data.size() - hash(key) % data.size() + current_index;
+        if (max_probe_length < data.size() - index_of_key % data.size() + current_index)
+          max_probe_length = data.size() - index_of_key % data.size() + current_index;   // update max_probe_length
+        return data.size() - index_of_key % data.size() + current_index;
     }
   }
 
@@ -84,6 +95,30 @@ class hash_map {
       resize(2 * data.size());
   }
 
+  void erase(const key_type& key) {
+    hasher hash ();
+    size_type index = hash(key) % data.size();
+    size_type i = 0;
+    while (key != data[index].key & i <= probe_length()) {
+      index = (index + 1) % data.size();
+      i++;
+    }
+    data[index] = entry{};                                            // deletes the the key value pair ??
+    load--;
+  }
+/*
+  size_type node_index(const key_type& key) {
+    hasher hash{};
+    size_type index = hash(key) % data.size();
+    size_type i = 0;
+    while (key != data[index].key)
+      if (i < max_probe_length) {
+        index = (index + 1) % data.size();
+        i++;
+      } else throw std::runtime_error("This key was not inserted!");       // Runtime_error if #Iterations == max_probe_length
+    return index;
+  }
+*/
   void resize(size_type new_size) {
     std::vector<entry> old_data(new_size);
     data.swap(old_data);
