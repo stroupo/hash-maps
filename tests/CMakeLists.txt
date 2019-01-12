@@ -18,8 +18,17 @@ target_link_libraries(main_test
     stroupo::hash_map
 )
 
+target_compile_options(main_test
+  PRIVATE
+    -g
+)
+
 add_test(hash_map_test
   main_test
+)
+
+add_test(coverage
+  kcov --include-path=${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/kcov main_test
 )
 
 # add_test(ranges_test

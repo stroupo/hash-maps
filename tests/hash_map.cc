@@ -23,6 +23,10 @@ using hash_map = stroupo::hash_map<key_type, mapped_type>;
 using custom_hash_map =
     stroupo::hash_map<key_type, mapped_type, custom_hash, custom_equal_to>;
 
+template class stroupo::hash_map<key_type, mapped_type>;
+template class stroupo::hash_map<key_type, mapped_type, custom_hash,
+                                 custom_equal_to>;
+
 TEST_CASE("The hash map") {
   static_assert(std::is_same_v<hash_map::key_type, key_type>,
                 "hash_map::key_type is not equal to key_type!");
