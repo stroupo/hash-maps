@@ -21,7 +21,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: matthiasware/stroupo
+      - image: lyrahgames/cpp-test-tools:latest
     steps:
       - checkout
       - run:
@@ -38,7 +38,7 @@ jobs:
 
   test:
     docker:
-      - image: matthiasware/stroupo
+      - image: lyrahgames/cpp-test-tools:latest
     steps:
       - checkout
       - attach_workspace:
@@ -48,10 +48,11 @@ jobs:
           command: |
             cd build
             ctest --verbose
+            bash <(curl -s https://codecov.io/bash) -s kcov
 
   export_test:
     docker:
-      - image: matthiasware/stroupo
+      - image: lyrahgames/cpp-test-tools:latest
     steps:
       - checkout
       - attach_workspace:
@@ -70,7 +71,7 @@ jobs:
 
   install:
     docker:
-      - image: matthiasware/stroupo
+      - image: lyrahgames/cpp-test-tools:latest
     steps:
       - checkout
       - attach_workspace:
@@ -87,7 +88,7 @@ jobs:
 
   install_test:
     docker:
-      - image: matthiasware/stroupo
+      - image: lyrahgames/cpp-test-tools:latest
     steps:
       - checkout
       - attach_workspace:
