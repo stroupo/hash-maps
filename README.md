@@ -9,6 +9,11 @@
         <td>
             Linux <a href="https://circleci.com/gh/stroupo/hash-maps/tree/master"><img src="https://circleci.com/gh/stroupo/hash-maps/tree/master.svg?style=svg"></a>
         </td>
+        <td>
+            <a href="https://codecov.io/gh/stroupo/hash-maps">
+              <img src="https://codecov.io/gh/stroupo/hash-maps/branch/master/graph/badge.svg" />
+            </a>
+        </td>
     </tr>
     <tr>
         <td>
@@ -17,6 +22,7 @@
         <td>
             Linux
         </td>
+        <td></td>
     </tr>
 </table>
 </b>
