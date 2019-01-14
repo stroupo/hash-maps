@@ -1,5 +1,15 @@
 # Hash Maps
 
+![](https://img.shields.io/github/license/stroupo/hash-maps.svg?style=for-the-badge)
+
+![](https://img.shields.io/github/languages/code-size/stroupo/hash-maps.svg?style=for-the-badge)
+![](https://img.shields.io/github/repo-size/stroupo/hash-maps.svg?style=for-the-badge)
+
+![](https://img.shields.io/github/last-commit/stroupo/hash-maps.svg?style=for-the-badge)
+![](https://img.shields.io/github/commit-activity/y/stroupo/hash-maps.svg?style=for-the-badge)
+
+![](https://img.shields.io/github/languages/top/stroupo/hash-maps.svg?style=for-the-badge)
+
 <b>
 <table>
     <tr>
@@ -7,11 +17,16 @@
             master
         </td>
         <td>
-            Linux <a href="https://circleci.com/gh/stroupo/hash-maps/tree/master"><img src="https://circleci.com/gh/stroupo/hash-maps/tree/master.svg?style=svg"></a>
+            <a href="https://circleci.com/gh/stroupo/hash-maps/tree/master"><img src="https://circleci.com/gh/stroupo/hash-maps/tree/master.svg?style=svg"></a>
         </td>
         <td>
             <a href="https://codecov.io/gh/stroupo/hash-maps">
               <img src="https://codecov.io/gh/stroupo/hash-maps/branch/master/graph/badge.svg" />
+            </a>
+        </td>
+        <td>
+            <a class="badge-align" href="https://www.codacy.com/app/lyrahgames/hash-maps?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stroupo/hash-maps&amp;utm_campaign=Badge_Grade">
+                <img src="https://api.codacy.com/project/badge/Grade/6b9b79cea57f453988149c64d17dfccb"/>
             </a>
         </td>
     </tr>
@@ -19,9 +34,8 @@
         <td>
             development
         </td>
-        <td>
-            Linux
-        </td>
+        <td></td>
+        <td></td>
         <td></td>
     </tr>
 </table>
