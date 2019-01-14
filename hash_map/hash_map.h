@@ -51,7 +51,7 @@ class hash_map {
   bool empty() const { return load_ == 0; }
   size_type size() const { return load_; }
   size_type capacity() const { return table_.size(); }
-  static size_type max_size() noexcept { return container::max_size(); }
+  // static size_type max_size() noexcept { return container::max_size(); }
 
   // Iterators
   auto begin() noexcept;
@@ -337,8 +337,7 @@ auto hash_map<Key, T, Hash, Key_equal, Allocator>::find(const key_type& key)
 
 template <typename Key, typename T, typename Hash, typename Key_equal,
           typename Allocator>
-auto hash_map<Key, T, Hash, Key_equal, Allocator>::erase(const key_type& key)
-{
+auto hash_map<Key, T, Hash, Key_equal, Allocator>::erase(const key_type& key) {
   const auto index = node_index(key);
   if (table_[index].empty) return 0;
   table_.erase(table_.begin() + index);
