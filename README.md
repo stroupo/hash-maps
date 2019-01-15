@@ -1,14 +1,8 @@
 # Hash Maps
-
-![](https://img.shields.io/github/license/stroupo/hash-maps.svg?style=for-the-badge)
-
+![](https://img.shields.io/github/languages/top/stroupo/hash-maps.svg?style=for-the-badge)
 ![](https://img.shields.io/github/languages/code-size/stroupo/hash-maps.svg?style=for-the-badge)
 ![](https://img.shields.io/github/repo-size/stroupo/hash-maps.svg?style=for-the-badge)
-
-![](https://img.shields.io/github/last-commit/stroupo/hash-maps.svg?style=for-the-badge)
-![](https://img.shields.io/github/commit-activity/y/stroupo/hash-maps.svg?style=for-the-badge)
-
-![](https://img.shields.io/github/languages/top/stroupo/hash-maps.svg?style=for-the-badge)
+![](https://img.shields.io/github/license/stroupo/hash-maps.svg?style=for-the-badge)
 
 <b>
 <table>
@@ -16,6 +10,11 @@
         <td>
             master
         </td>
+        <td>
+            <a href="https://github.com/stroupo/hash-maps">
+                <img src="https://img.shields.io/github/last-commit/stroupo/hash-maps/master.svg?logo=github&logoColor=white">
+            </a>
+        </td>    
         <td>
             <a href="https://circleci.com/gh/stroupo/hash-maps/tree/master"><img src="https://circleci.com/gh/stroupo/hash-maps/tree/master.svg?style=svg"></a>
         </td>
@@ -29,6 +28,11 @@
                 <img src="https://api.codacy.com/project/badge/Grade/6b9b79cea57f453988149c64d17dfccb"/>
             </a>
         </td>
+        <td>
+            <a href="https://lgtm.com/projects/g/stroupo/hash-maps/context:cpp">
+                <img alt="Language grade: C/C++" src="https://img.shields.io/lgtm/grade/cpp/g/stroupo/hash-maps.svg?logo=lgtm&logoWidth=18"/>
+            </a>
+        </td>
     </tr>
     <tr>
         <td>
@@ -37,6 +41,34 @@
         <td></td>
         <td></td>
         <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Current
+        </td>
+        <td>
+            <a href="https://github.com/stroupo/hash-maps">
+                <img src="https://img.shields.io/github/commit-activity/y/stroupo/hash-maps.svg?logo=github&logoColor=white">
+            </a>
+        </td>
+        <td>
+            <img src="https://img.shields.io/github/release/stroupo/hash-maps.svg?logo=github&logoColor=white">
+        </td>
+        <td>
+            <img src="https://img.shields.io/github/release-pre/stroupo/hash-maps.svg?label=pre-release&logo=github&logoColor=white">
+        </td>
+        <td>
+            <img src="https://img.shields.io/github/tag/stroupo/hash-maps.svg?colorB=blue&logo=github&logoColor=white">
+        </td>
+        <td>
+            <img src="https://img.shields.io/github/tag-date/stroupo/hash-maps.svg?label=latest%20tag&logo=github&logoColor=white">
+        </td>
     </tr>
 </table>
 </b>
@@ -102,7 +134,7 @@ As long as this build directory exists the commands written above can be used to
 - Benchmark everything!
 
 ## Resources
-- https://probablydance.com/2014/05/03/i-wrote-a-fast-hash-table/
-- http://bannalia.blogspot.com/2014/01/a-better-hash-table-clang.html
-- https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-- https://stackoverflow.com/questions/34563574/how-to-build-hash-function-for-various-template-types
+- [I wrote a fast hash table](https://probablydance.com/2014/05/03/i-wrote-a-fast-hash-table/)
+- [A better hash table](http://bannalia.blogspot.com/2014/01/a-better-hash-table-clang.html)
+- [A fast alternative to the modulo reduction](https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/)
+- [How to build a hash function for various template types](https://stackoverflow.com/questions/34563574/how-to-build-hash-function-for-various-template-types)
