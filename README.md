@@ -23,23 +23,11 @@
               <img src="https://codecov.io/gh/stroupo/hash-maps/branch/master/graph/badge.svg" />
             </a>
         </td>
-        <td>
-            <a class="badge-align" href="https://www.codacy.com/app/lyrahgames/hash-maps?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stroupo/hash-maps&amp;utm_campaign=Badge_Grade">
-                <img src="https://api.codacy.com/project/badge/Grade/6b9b79cea57f453988149c64d17dfccb"/>
-            </a>
-        </td>
-        <td>
-            <a href="https://lgtm.com/projects/g/stroupo/hash-maps/context:cpp">
-                <img alt="Language grade: C/C++" src="https://img.shields.io/lgtm/grade/cpp/g/stroupo/hash-maps.svg?logo=lgtm&logoWidth=18"/>
-            </a>
-        </td>
     </tr>
     <tr>
         <td>
             development
         </td>
-        <td></td>
-        <td></td>
         <td></td>
         <td></td>
         <td></td>
@@ -64,7 +52,7 @@
             <img src="https://img.shields.io/github/release-pre/stroupo/hash-maps.svg?label=pre-release&logo=github&logoColor=white">
         </td>
         <td>
-            <img src="https://img.shields.io/github/tag/stroupo/hash-maps.svg?colorB=blue&logo=github&logoColor=white">
+            <img src="https://img.shields.io/github/tag/stroupo/hash-maps.svg?logo=github&logoColor=white">
         </td>
         <td>
             <img src="https://img.shields.io/github/tag-date/stroupo/hash-maps.svg?label=latest%20tag&logo=github&logoColor=white">
