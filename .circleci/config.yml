@@ -17,6 +17,7 @@ workflows:
       - install_test:
           requires:
             - install
+      - code_coverage
 
 jobs:
   build:
@@ -102,3 +103,19 @@ jobs:
             cmake ..
             cmake --build .
             ctest --verbose
+
+  code_coverage:
+    docker:
+      - image: lyrahgames/cpp-test-tools:latest
+    steps:
+      - checkout
+      - run:
+          name: code_coverage
+          command: |
+            mkdir build
+            cd build
+            CXXFLAGS="-g" cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja ..
+            cmake --build .
+            kcov --include-path=.. ./code_coverage tests/main_test
+            bash <(curl -s https://codecov.io/bash) -s code_coverage
+

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 enable_testing()
 
 find_package(doctest REQUIRED)
+# this makes internal and external testing possible
 if(NOT TARGET stroupo::hash_map)
   find_package(hash_map CONFIG REQUIRED)
 endif()
@@ -18,19 +19,4 @@ target_link_libraries(main_test
     stroupo::hash_map
 )
 
-target_compile_options(main_test
-  PRIVATE
-    -g
-)
-
-add_test(hash_map_test
-  main_test
-)
-
-add_test(coverage
-  kcov --include-path=${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/kcov main_test
-)
-
-# add_test(ranges_test
-#   main_test
-# )
+add_test(main_test main_test)
