@@ -22,7 +22,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: lyrahgames/cpp-test-tools:latest
+      - image: stroupo/cpp-test-tools:latest
     steps:
       - checkout
       - run:
@@ -39,7 +39,7 @@ jobs:
 
   test:
     docker:
-      - image: lyrahgames/cpp-test-tools:latest
+      - image: stroupo/cpp-test-tools:latest
     steps:
       - checkout
       - attach_workspace:
@@ -49,11 +49,10 @@ jobs:
           command: |
             cd build
             ctest --verbose
-            bash <(curl -s https://codecov.io/bash) -s kcov
 
   export_test:
     docker:
-      - image: lyrahgames/cpp-test-tools:latest
+      - image: stroupo/cpp-test-tools:latest
     steps:
       - checkout
       - attach_workspace:
@@ -72,7 +71,7 @@ jobs:
 
   install:
     docker:
-      - image: lyrahgames/cpp-test-tools:latest
+      - image: stroupo/cpp-test-tools:latest
     steps:
       - checkout
       - attach_workspace:
@@ -89,7 +88,7 @@ jobs:
 
   install_test:
     docker:
-      - image: lyrahgames/cpp-test-tools:latest
+      - image: stroupo/cpp-test-tools:latest
     steps:
       - checkout
       - attach_workspace:
@@ -106,7 +105,7 @@ jobs:
 
   code_coverage:
     docker:
-      - image: lyrahgames/cpp-test-tools:latest
+      - image: stroupo/cpp-test-tools:latest
     steps:
       - checkout
       - run:
@@ -114,8 +113,10 @@ jobs:
           command: |
             mkdir build
             cd build
-            CXXFLAGS="-g" cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja ..
+            CXXFLAGS="-g -O0 -fprofile-arcs -ftest-coverage" LDFLAGS="-fprofile-arcs -ftest-coverage" cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja ..
             cmake --build .
-            kcov --include-path=.. ./code_coverage tests/main_test
-            bash <(curl -s https://codecov.io/bash) -s code_coverage
+            # kcov --include-path=.. ./code_coverage tests/main_test
+            # bash <(curl -s https://codecov.io/bash) -s code_coverage
+            for filename in `find . | egrep '\.cpp'`; do gcov -n -o . $filename > /dev/null; done
+            bash <(curl -s https://codecov.io/bash)
 
