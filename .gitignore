@@ -1,8 +1,9 @@
 *
 
 !.circleci
-!hash_map
+!hash_map_lib
 !tests
+!benchmarks
 
 !*.cc
 !*.h

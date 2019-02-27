@@ -4,7 +4,7 @@
 #include <random>
 #include <utility>
 
-#include <hash_map/hash_map.h>
+#include <hash_map_lib/hash_map.h>
 
 struct custom_hash {
   std::size_t operator()(int key) const noexcept { return key; }
@@ -28,7 +28,7 @@ struct bit_reversal_hash {
 };
 
 int main(int argc, char** argv) {
-  using stroupo::hash_map;
+  using stroupo::hash_map_lib::hash_map;
   hash_map<int, int, bit_reversal_hash> map;
 
   bit_reversal_hash hash{};

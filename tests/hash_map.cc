@@ -5,9 +5,10 @@
 #include <type_traits>
 #include <vector>
 
-#include <hash_map/hash_map.h>
+#include <hash_map_lib/hash_map.h>
 
 using namespace std;
+// using namespace stroupo::hash_map_lib;
 
 struct custom_hash {
   constexpr std::size_t operator()(int key) const noexcept { return key; }
@@ -19,13 +20,14 @@ struct custom_equal_to {
 
 using key_type = int;
 using mapped_type = int;
-using hash_map = stroupo::hash_map<key_type, mapped_type>;
+using hash_map = stroupo::hash_map_lib::hash_map<key_type, mapped_type>;
 using custom_hash_map =
-    stroupo::hash_map<key_type, mapped_type, custom_hash, custom_equal_to>;
+    stroupo::hash_map_lib::hash_map<key_type, mapped_type, custom_hash,
+                                    custom_equal_to>;
 
-template class stroupo::hash_map<key_type, mapped_type>;
-template class stroupo::hash_map<key_type, mapped_type, custom_hash,
-                                 custom_equal_to>;
+template class stroupo::hash_map_lib::hash_map<key_type, mapped_type>;
+template class stroupo::hash_map_lib::hash_map<key_type, mapped_type,
+                                               custom_hash, custom_equal_to>;
 
 TEST_CASE("The hash map") {
   static_assert(std::is_same_v<hash_map::key_type, key_type>,

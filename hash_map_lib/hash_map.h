@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-namespace stroupo {
+namespace stroupo::hash_map_lib {
 
 template <typename Key, typename T, typename Hash = std::hash<Key>,
           typename Key_equal = std::equal_to<Key>,
@@ -354,6 +354,6 @@ auto hash_map<Key, T, Hash, Key_equal, Allocator>::find(
   return &table_[index];
 }
 
-}  // namespace stroupo
+}  // namespace stroupo::hash_map_lib
 
 #endif  // STROUPO_HASH_MAP_H_

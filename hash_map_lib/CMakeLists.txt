@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(hash_map
+project(hash_map_lib
   VERSION 0.1.0
   LANGUAGES CXX
   DESCRIPTION

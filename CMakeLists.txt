@@ -3,9 +3,9 @@ project(stroupo-hash-maps LANGUAGES CXX)
 
 enable_testing()
 
-add_subdirectory(hash_map)
+add_subdirectory(hash_map_lib)
 add_subdirectory(tests)
-add_subdirectory(bench)
+add_subdirectory(benchmarks)
 
 add_executable(main main.cc)
-target_link_libraries(main PRIVATE stroupo::hash_map)
+target_link_libraries(main PRIVATE stroupo::hash_map_lib)
