@@ -12,6 +12,8 @@ add_executable(main_test
   doctest_main.cc
   hash_map.cc
   ranges.cc
+  open_addressing/linear_probing/unordered_map.cc
+  open_addressing/robin_hood/unordered_map.cc
 )
 
 target_link_libraries(main_test
